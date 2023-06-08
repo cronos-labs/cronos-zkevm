@@ -16,7 +16,7 @@ zksync_utils = { path = "../../lib/utils", version = "1.0" }
 
 metrics = "0.20"
 reqwest = { version = "0.11", features = ["blocking"] }
-regex = "1.7.2"
+regex = "1.8"
 tokio = "1.27.0"
 futures = { version = "0.3", features = ["compat"] }
 ctrlc = { version = "3.1", features = ["termination"] }
