@@ -52,8 +52,7 @@ contents).
 
 As our network has just started, the database would be quite empty.
 
-You can see the schema for the database in [dal/README.md](../../core/lib/dal/README.md)
-document with DB schema.
+You can see the schema for the database in [dal/README.md](../../core/lib/dal/README.md) document with DB schema.
 
 #### Docker
 
