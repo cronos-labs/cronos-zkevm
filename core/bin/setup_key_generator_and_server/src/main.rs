@@ -3,6 +3,7 @@ use prover_service::utils::generate_setup_for_circuit;
 use prover_service::Setup;
 use std::env;
 use std::fs::File;
+use std::time::Instant;
 use structopt::StructOpt;
 use zkevm_test_harness::abstract_zksync_circuit::concrete_circuits::ZkSyncCircuit;
 use zkevm_test_harness::bellman::bn256::Bn256;
@@ -22,22 +23,24 @@ struct Opt {
 
 fn main() {
     let opt = Opt::from_args();
-    env::set_var("CRS_FILE", "setup_2^26.key");
+    env::set_var("CRS_FILE", "setup_2^22.key");
     vlog::info!("Starting setup key generation!");
     get_circuits_for_vk()
         .into_iter()
-        .filter(|c| c.numeric_circuit_type() == opt.numeric_circuit)
+        //.filter(|c| c.numeric_circuit_type() == opt.numeric_circuit)
         .for_each(generate_setup_key_for_circuit);
 }
 
 fn generate_setup_key_for_circuit(circuit: ZkSyncCircuit<Bn256, VmWitnessOracle<Bn256>>) {
+    let started_at = Instant::now();
     let mut prover = Prover::new();
     let setup = generate_setup_for_circuit(&mut prover, &circuit);
     save_setup_for_circuit_type(circuit.numeric_circuit_type(), setup);
     vlog::info!(
-        "Finished setup key generation for circuit {:?} (id {:?})",
+        "Finished setup key generation for circuit {:?} (id {:?}), time {:?}",
         circuit.short_description(),
-        circuit.numeric_circuit_type()
+        circuit.numeric_circuit_type(),
+        started_at.elapsed()
     );
 }
 

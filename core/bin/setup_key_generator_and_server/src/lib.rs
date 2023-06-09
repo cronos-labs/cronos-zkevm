@@ -32,8 +32,8 @@ pub fn get_circuits_for_vk() -> Vec<ZkSyncCircuit<Bn256, VmWitnessOracle<Bn256>>
 }
 
 fn ensure_setup_key_exist() {
-    if !Path::new("setup_2^26.key").exists() {
-        panic!("File setup_2^26.key is required to be present in current directory.");
+    if !Path::new("setup_2^22.key").exists() {
+        panic!("File setup_2^22.key is required to be present in current directory.");
     }
 }
 
