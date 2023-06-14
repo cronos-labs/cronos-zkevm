@@ -20,8 +20,7 @@ google-cloud-default = { git = "https://github.com/yoshidan/google-cloud-rust", 
 aws-config = { git = "https://github.com/awslabs/aws-sdk-rust", branch = "main" }
 aws-endpoint = { git = "https://github.com/awslabs/aws-sdk-rust", branch = "main" }
 aws-sdk-s3 = { git = "https://github.com/awslabs/aws-sdk-rust", branch = "main" }
-aws_types = { git = "https://github.com/awslabs/aws-sdk-rust", branch = "main" }
-s3_service = { git = "https://github.com/awslabs/aws-sdk-rust", branch = "main" }
+aws-types = { git = "https://github.com/awslabs/aws-sdk-rust", branch = "main" }
 http = "0.2.9"
 metrics = "0.20"
 tokio = { version = "1.21.2", features = ["full"] }
