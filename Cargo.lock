@@ -7772,6 +7772,10 @@ dependencies = [
 name = "zksync_object_store"
 version = "1.0.0"
 dependencies = [
+ "aws-config",
+ "aws-endpoint",
+ "aws-sdk-s3",
+ "aws-types",
  "bincode",
  "google-cloud-auth",
  "google-cloud-default",
