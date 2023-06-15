@@ -1,16 +1,13 @@
 //! S3-based [`ObjectStore`] implementation.
 
-use aws_config::meta::region::RegionProviderChain;
 use aws_sdk_s3::{
-    config::Region,
     error::SdkError,
     operation::{
         delete_object::DeleteObjectError, get_object::GetObjectError, put_object::PutObjectError,
     },
     primitives::{ByteStream, ByteStreamError},
-    Client, Error,
+    Client,
 };
-use aws_types::SdkConfig;
 
 use tokio::runtime::{Handle, RuntimeFlavor};
 
@@ -33,17 +30,20 @@ impl fmt::Debug for AsyncS3Storage {
 }
 
 impl AsyncS3Storage {
-    pub async fn new(credential_file_path: Option<String>, bucket_prefix: String) -> Self {
-        let client_config = Self::get_client_config(credential_file_path.clone())
-            .await
-            .expect("failed fetching s3 client config after retries");
+    pub async fn new(endpoint_url: String, bucket_prefix: String) -> Self {
+        let shared_config = aws_config::load_from_env().await;
+        let config = aws_sdk_s3::config::Builder::from(&shared_config)
+            .endpoint_url(endpoint_url)
+            .build();
 
+        let client = Client::from_conf(config);
         Self {
-            client: Client::new(&client_config),
+            client,
             bucket_prefix,
         }
     }
 
+    /**
     async fn get_client_config(_credential_file_path: Option<String>) -> Result<SdkConfig, Error> {
         let region = "";
         let provider = RegionProviderChain::first_try(Region::new(region)).or_default_provider();
@@ -54,6 +54,7 @@ impl AsyncS3Storage {
 
         Ok(aws_config::from_env().region(provider).load().await)
     }
+    **/
 
     fn filename(bucket: &str, filename: &str) -> String {
         format!("{bucket}/{filename}")
@@ -213,11 +214,7 @@ pub(crate) struct S3Storage {
 }
 
 impl S3Storage {
-    pub fn new(
-        credential_file_path: Option<String>,
-        bucket_prefix: String,
-        _max_retries: u16,
-    ) -> Self {
+    pub fn new(endpoint_url: String, bucket_prefix: String, _max_retries: u16) -> Self {
         let handle = Handle::try_current().unwrap_or_else(|_| {
             panic!(
                 "No Tokio runtime detected. Make sure that `dyn ObjectStore` is created \
@@ -228,7 +225,7 @@ impl S3Storage {
 
         // TODO: S3 client has default 2 retries. we can pass max_retries to the s3 retry config
 
-        let inner = AsyncS3Storage::new(credential_file_path, bucket_prefix);
+        let inner = AsyncS3Storage::new(endpoint_url, bucket_prefix);
         Self {
             inner: Self::block_on(&handle, inner),
             handle,

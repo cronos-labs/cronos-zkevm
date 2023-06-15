@@ -165,11 +165,10 @@ impl ObjectStoreFactory {
             ObjectStoreMode::GCSWithCredentialFile => Some(config.gcs_credential_file_path.clone()),
             _ => None,
         };
-        let s3_credential_file_path = match config.mode {
-            ObjectStoreMode::S3WithCredentialFile => Some(config.s3_credential_file_path.clone()),
-            _ => None,
+        let s3_endpoint_url = match config.mode {
+            ObjectStoreMode::S3 => config.s3_endpoint_url.clone(),
+            _ => String::default(),
         };
-
         match config.mode {
             ObjectStoreMode::GCS => {
                 vlog::trace!("Initialized GoogleCloudStorage Object store without credential file");
@@ -193,10 +192,10 @@ impl ObjectStoreFactory {
                     config.file_backed_base_path.clone(),
                 ))
             }
-            ObjectStoreMode::S3WithCredentialFile => {
+            ObjectStoreMode::S3 => {
                 vlog::trace!("Initialized S3 Object store with credential file");
                 Box::new(S3Storage::new(
-                    s3_credential_file_path,
+                    s3_endpoint_url,
                     config.bucket_base_url.clone(),
                     config.max_retries,
                 ))
