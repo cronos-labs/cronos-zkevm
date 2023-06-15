@@ -270,6 +270,20 @@ mod test {
 
     use super::*;
 
+    #[tokio::test]
+    async fn test_connection() {
+        let ep =
+            "https://bucket.vpce-0b7f3607703e9c347-9qykgare.s3.ap-southeast-1.vpce.amazonaws.com";
+        let bucket = "staging-l2-zk-artifacts";
+        let s3_storage = S3Storage::new(ep.to_string(), bucket.to_string(), 1);
+
+        let key = "testkey";
+        let value = vec![1, 2, 3];
+        let result = s3_storage.put_raw(Bucket::ProverJobs, key, value);
+        
+        assert!(result.is_ok(), "result must be OK");
+    }
+
     async fn test_blocking() {
         let handle = Handle::current();
         let result = S3Storage::block_on(&handle, async { 42 });
