@@ -269,6 +269,7 @@ mod test {
 
     #[tokio::test]
     async fn test_connection() {
+        // should remove or revise this test when the repo is going to public
         let ep =
             "https://bucket.vpce-0b7f3607703e9c347-9qykgare.s3.ap-southeast-1.vpce.amazonaws.com";
         let bucket = "staging-l2-zk-artifacts";

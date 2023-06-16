@@ -193,7 +193,7 @@ impl ObjectStoreFactory {
                 ))
             }
             ObjectStoreMode::S3 => {
-                vlog::trace!("Initialized S3 Object store with credential file");
+                vlog::trace!("Initialized S3 Object store without credential file");
                 Box::new(S3Storage::new(
                     s3_endpoint_url,
                     config.bucket_base_url.clone(),
