@@ -16,7 +16,7 @@ use std::{fmt, future::Future, thread, time::Instant};
 use crate::raw::{Bucket, ObjectStore, ObjectStoreError};
 
 pub struct AsyncS3Storage {
-    bucket_prefix: String,
+    bucket_url: String,
     client: Client,
 }
 
@@ -24,23 +24,20 @@ impl fmt::Debug for AsyncS3Storage {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         formatter
             .debug_struct("S3StorageAsync")
-            .field("bucket_prefix", &self.bucket_prefix)
+            .field("bucket_url", &self.bucket_url)
             .finish()
     }
 }
 
 impl AsyncS3Storage {
-    pub async fn new(endpoint_url: String, bucket_prefix: String) -> Self {
+    pub async fn new(endpoint_url: String, bucket_url: String) -> Self {
         let shared_config = aws_config::load_from_env().await;
         let config = aws_sdk_s3::config::Builder::from(&shared_config)
             .endpoint_url(endpoint_url)
             .build();
 
         let client = Client::from_conf(config);
-        Self {
-            client,
-            bucket_prefix,
-        }
+        Self { client, bucket_url }
     }
 
     /**
@@ -69,20 +66,20 @@ impl AsyncS3Storage {
         let filename = Self::filename(bucket, key);
         vlog::trace!(
             "Fetching data from S3 for key {filename} from bucket {}",
-            self.bucket_prefix
+            self.bucket_url
         );
 
         let object = self
             .client
             .get_object()
-            .bucket(self.bucket_prefix.clone())
+            .bucket(self.bucket_url.clone())
             .key(filename.clone())
             .send()
             .await?;
 
         vlog::trace!(
             "Fetched data from S3 for key {filename} from bucket {} and it took: {:?}",
-            self.bucket_prefix,
+            self.bucket_url,
             started_at.elapsed()
         );
 
@@ -110,7 +107,7 @@ impl AsyncS3Storage {
         let filename = Self::filename(bucket, key);
         vlog::trace!(
             "Storing data to s3 for key {filename} from bucket {}",
-            self.bucket_prefix
+            self.bucket_url
         );
 
         let body = ByteStream::from(value);
@@ -118,7 +115,7 @@ impl AsyncS3Storage {
         let result = self
             .client
             .put_object()
-            .bucket(self.bucket_prefix.clone())
+            .bucket(self.bucket_url.clone())
             .key(filename.clone())
             .body(body)
             .send()
@@ -128,7 +125,7 @@ impl AsyncS3Storage {
 
         vlog::trace!(
             "Stored data to S3 for key {filename} from bucket {} and it took: {:?}",
-            self.bucket_prefix,
+            self.bucket_url,
             started_at.elapsed()
         );
         metrics::histogram!(
@@ -151,13 +148,13 @@ impl AsyncS3Storage {
         let filename = Self::filename(bucket, key);
         vlog::trace!(
             "Removing data from S3 for key {filename} from bucket {}",
-            self.bucket_prefix
+            self.bucket_url
         );
 
         let request = self
             .client
             .delete_object()
-            .bucket(self.bucket_prefix.clone())
+            .bucket(self.bucket_url.clone())
             .key(filename.clone());
 
         async move {
@@ -214,7 +211,7 @@ pub(crate) struct S3Storage {
 }
 
 impl S3Storage {
-    pub fn new(endpoint_url: String, bucket_prefix: String, _max_retries: u16) -> Self {
+    pub fn new(endpoint_url: String, bucket_url: String, _max_retries: u16) -> Self {
         let handle = Handle::try_current().unwrap_or_else(|_| {
             panic!(
                 "No Tokio runtime detected. Make sure that `dyn ObjectStore` is created \
@@ -225,7 +222,7 @@ impl S3Storage {
 
         // TODO: S3 client has default 2 retries. we can pass max_retries to the s3 retry config
 
-        let inner = AsyncS3Storage::new(endpoint_url, bucket_prefix);
+        let inner = AsyncS3Storage::new(endpoint_url, bucket_url);
         Self {
             inner: Self::block_on(&handle, inner),
             handle,
@@ -280,7 +277,7 @@ mod test {
         let key = "testkey";
         let value = vec![1, 2, 3];
         let result = s3_storage.put_raw(Bucket::ProverJobs, key, value);
-        
+
         assert!(result.is_ok(), "result must be OK");
     }
 
