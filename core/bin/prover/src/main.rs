@@ -1,7 +1,6 @@
 use std::env;
 use std::sync::{Arc, Mutex};
 
-use api::gpu_prover;
 use futures::future;
 use local_ip_address::local_ip;
 use prover_service::run_prover::run_prover_with_remote_synthesizer;
@@ -61,45 +60,9 @@ async fn graceful_shutdown() {
         .update_prover_instance_status(address, GpuProverInstanceStatus::Dead, 0, region, zone);
 }
 
-fn get_ram_per_gpu() -> u64 {
-    let device_info = gpu_prover::cuda_bindings::device_info(0).unwrap();
-    let ram_in_gb: u64 = device_info.total / (1024 * 1024 * 1024);
-    vlog::info!("Detected RAM per GPU: {:?} GB", ram_in_gb);
-    ram_in_gb
-}
-
 fn get_prover_config_for_machine_type() -> (ProverConfig, u8) {
     let prover_configs = ProverConfigs::from_env();
-    let actual_num_gpus = match gpu_prover::cuda_bindings::devices() {
-        Ok(gpus) => gpus as u8,
-        Err(err) => {
-            vlog::error!("unable to get number of GPUs: {err:?}");
-            panic!("unable to get number of GPUs: {:?}", err);
-        }
-    };
-    vlog::info!("detected number of gpus: {}", actual_num_gpus);
-    let ram_in_gb = get_ram_per_gpu();
-
-    match actual_num_gpus {
-        1 => {
-            vlog::info!("Detected machine type with 1 GPU and 80GB RAM");
-            (prover_configs.one_gpu_eighty_gb_mem, actual_num_gpus)
-        }
-        2 => {
-            if ram_in_gb > 39 {
-                vlog::info!("Detected machine type with 2 GPU and 80GB RAM");
-                (prover_configs.two_gpu_eighty_gb_mem, actual_num_gpus)
-            } else {
-                vlog::info!("Detected machine type with 2 GPU and 40GB RAM");
-                (prover_configs.two_gpu_forty_gb_mem, actual_num_gpus)
-            }
-        }
-        4 => {
-            vlog::info!("Detected machine type with 4 GPU and 80GB RAM");
-            (prover_configs.four_gpu_eighty_gb_mem, actual_num_gpus)
-        }
-        _ => panic!("actual_num_gpus: {} not supported yet", actual_num_gpus),
-    }
+    return (prover_configs.non_gpu, 0);
 }
 
 #[tokio::main]
