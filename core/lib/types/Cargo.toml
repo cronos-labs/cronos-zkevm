@@ -4,7 +4,7 @@ version = "1.0.0"
 edition = "2018"
 authors = ["The Matter Labs Team <hello@matterlabs.dev>"]
 homepage = "https://zksync.io/"
-repository = "https://github.com/matter-labs/zksync-2"
+repository = "https://github.com/cronos-labs/zksync-era"
 license = "Apache-2.0"
 keywords = ["blockchain", "zksync"]
 categories = ["cryptography"]
@@ -17,10 +17,10 @@ zksync_basic_types = { path = "../basic_types", version = "1.0" }
 zksync_contracts = { path = "../contracts", version = "1.0" }
 zksync_mini_merkle_tree = { path = "../mini_merkle_tree", version = "1.0"}
 # We need this import because we wanat DAL to be responsible for (de)serialization
-codegen = { git = "https://github.com/matter-labs/solidity_plonk_verifier.git", branch = "dev" }
-zkevm_test_harness = { git = "https://github.com/matter-labs/era-zkevm_test_harness.git", branch = "v1.3.2" }
-zk_evm = {git = "https://github.com/matter-labs/era-zk_evm.git", branch = "v1.3.2"}
-zkevm-assembly = { git = "https://github.com/matter-labs/era-zkEVM-assembly.git", branch = "v1.3.2" }
+codegen = { git = "https://github.com/cronos-labs/solidity_plonk_verifier.git", branch = "dev" }
+zkevm_test_harness = { git = "https://github.com/cronos-labs/era-zkevm_test_harness.git", branch = "v1.3.2" }
+zk_evm = {git = "https://github.com/cronos-labs/era-zk_evm.git", branch = "v1.3.2"}
+zkevm-assembly = { git = "https://github.com/cronos-labs/era-zkEVM-assembly.git", branch = "v1.3.2" }
 
 
 rlp = "0.5"
