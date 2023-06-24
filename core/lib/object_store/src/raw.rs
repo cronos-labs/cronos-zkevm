@@ -1,6 +1,6 @@
 use std::{error, fmt, sync::Arc};
 
-use crate::{file::FileBackedObjectStore, gcs::GoogleCloudStorage, mock::MockStore};
+use crate::{file::FileBackedObjectStore, gcs::GoogleCloudStorage, mock::MockStore, s3::S3Storage};
 use zksync_config::configs::object_store::ObjectStoreMode;
 use zksync_config::ObjectStoreConfig;
 
@@ -165,6 +165,10 @@ impl ObjectStoreFactory {
             ObjectStoreMode::GCSWithCredentialFile => Some(config.gcs_credential_file_path.clone()),
             _ => None,
         };
+        let s3_endpoint_url = match config.mode {
+            ObjectStoreMode::S3 => config.s3_endpoint_url.clone(),
+            _ => String::default(),
+        };
         match config.mode {
             ObjectStoreMode::GCS => {
                 vlog::trace!("Initialized GoogleCloudStorage Object store without credential file");
@@ -186,6 +190,14 @@ impl ObjectStoreFactory {
                 vlog::trace!("Initialized FileBacked Object store");
                 Box::new(FileBackedObjectStore::new(
                     config.file_backed_base_path.clone(),
+                ))
+            }
+            ObjectStoreMode::S3 => {
+                vlog::trace!("Initialized S3 Object store without credential file");
+                Box::new(S3Storage::new(
+                    s3_endpoint_url,
+                    config.bucket_base_url.clone(),
+                    config.max_retries,
                 ))
             }
         }

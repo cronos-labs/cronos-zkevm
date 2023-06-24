@@ -28,6 +28,7 @@ mod gcs;
 mod mock;
 mod objects;
 mod raw;
+mod s3;
 
 #[doc(hidden)] // used by the `serialize_using_bincode!` macro
 pub mod _reexports {
