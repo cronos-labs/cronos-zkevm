@@ -431,7 +431,7 @@ checksum = "224afbd727c3d6e4b90103ece64b8d1b67fbb1973b1046c2281eed3f3803f800"
 [[package]]
 name = "api"
 version = "0.1.0"
-source = "git+https://github.com/matter-labs/era-heavy-ops-service.git?branch=v1.3.2#9418d0216d52e605a2ecd02e33e9cf0361630333"
+source = "git+https://github.com/JayT106/era-heavy-ops-service.git?branch=domain-22#d7dea2f86d4d02ea05c073f8a15659a739744251"
 dependencies = [
  "bellman_ce",
  "cfg-if 1.0.0",
@@ -4814,7 +4814,7 @@ dependencies = [
 [[package]]
 name = "prover-service"
 version = "0.1.0"
-source = "git+https://github.com/matter-labs/era-heavy-ops-service.git?branch=v1.3.2#9418d0216d52e605a2ecd02e33e9cf0361630333"
+source = "git+https://github.com/JayT106/era-heavy-ops-service.git?branch=domain-22#d7dea2f86d4d02ea05c073f8a15659a739744251"
 dependencies = [
  "api",
  "bincode",
