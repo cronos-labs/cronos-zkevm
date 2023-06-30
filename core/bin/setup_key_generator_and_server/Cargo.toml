@@ -27,7 +27,8 @@ circuit_testing = {git = "https://github.com/matter-labs/era-circuit_testing.git
 #prover-service = { git = "https://github.com/matter-labs/era-heavy-ops-service.git", branch = "v1.3.2", features=["legacy"], default-features=false}
  api = { git = "https://github.com/JayT106/era-heavy-ops-service.git", branch = "domain-22", features=["legacy"], default-features=false}
  prover-service = { git = "https://github.com/JayT106/era-heavy-ops-service.git", branch = "domain-22", features=["legacy"], default-features=false}
-zkevm_test_harness = { git = "https://github.com/matter-labs/era-zkevm_test_harness.git", branch = "v1.3.2"}
+#zkevm_test_harness = { git = "https://github.com/matter-labs/era-zkevm_test_harness.git", branch = "v1.3.2"}
+zkevm_test_harness = { git = "https://github.com/jayt106/era-zkevm_test_harness.git", branch = "domain-22"}
 
 structopt = "0.3.26"
 itertools = "0.10.5"
