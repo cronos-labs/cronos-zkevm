@@ -27,8 +27,7 @@ fn main() {
     vlog::info!("Starting setup key generation!");
     get_circuits_for_vk()
         .into_iter()
-        .rev()
-        //.filter(|c| c.numeric_circuit_type() == opt.numeric_circuit)
+        .filter(|c| c.numeric_circuit_type() == opt.numeric_circuit)
         .for_each(generate_setup_key_for_circuit);
 }
 
