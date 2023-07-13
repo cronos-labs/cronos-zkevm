@@ -1,5 +1,5 @@
 import { BigNumber, BigNumberish, BytesLike, ethers } from 'ethers';
-import { IERC20MetadataFactory, IL1BridgeFactory, IL2BridgeFactory, IZkSyncFactory } from '../typechain';
+import { IERC20MetadataFactory, IL1Bridge, IL1BridgeFactory, IL2BridgeFactory, IZkSyncFactory } from '../typechain';
 import { Provider } from './provider';
 import {
     Address,
@@ -155,7 +155,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
 
                 return this.requestExecute(depositTx);
             } else {
-                const bridgeContracts = await this.getL1BridgeContracts();
+                const bridgeContracts = await this.getL1BridgeContracts();                
                 if (transaction.approveERC20) {
                     const bridgeAddress = transaction.bridgeAddress
                         ? transaction.bridgeAddress
@@ -271,9 +271,8 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             );
 
             if (token == ETH_ADDRESS) {
-                overrides.value ??= baseCost.add(operatorTip).add(amount);
-
                 return {
+                    l1Value: baseCost.add(operatorTip).add(amount),
                     contractAddress: to,
                     calldata: '0x',
                     l2Value: amount,
@@ -284,17 +283,18 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                 };
             } else {
                 let refundRecipient = tx.refundRecipient ?? ethers.constants.AddressZero;
-                const args: [Address, Address, BigNumberish, BigNumberish, BigNumberish, Address] = [
+                const cost = baseCost.add(operatorTip);
+                const args: [Address, Address, BigNumberish, BigNumberish, BigNumberish, Address, BigNumberish] = [
                     to,
                     token,
                     amount,
                     tx.l2GasLimit,
                     tx.gasPerPubdataByte,
-                    refundRecipient
+                    refundRecipient,
+                    cost
                 ];
 
-                overrides.value ??= baseCost.add(operatorTip);
-                await checkBaseCost(baseCost, overrides.value);
+                await checkBaseCost(baseCost, cost);
 
                 return await bridgeContracts.erc20.populateTransaction.deposit(...args, overrides);
             }
@@ -551,6 +551,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         }
 
         async requestExecute(transaction: {
+            l1Value: BigNumberish;
             contractAddress: Address;
             calldata: BytesLike;
             l2GasLimit?: BigNumberish;
@@ -566,6 +567,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         }
 
         async estimateGasRequestExecute(transaction: {
+            l1Value?: BigNumberish;
             contractAddress: Address;
             calldata: BytesLike;
             l2GasLimit?: BigNumberish;
@@ -586,6 +588,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
         }
 
         async getRequestExecuteTx(transaction: {
+            l1Value?: BigNumberish;
             contractAddress: Address;
             calldata: BytesLike;
             l2GasLimit?: BigNumberish;
@@ -599,6 +602,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             const zksyncContract = await this.getMainContract();
 
             const { ...tx } = transaction;
+            tx.l1Value ??= BigNumber.from(0);
             tx.l2Value ??= BigNumber.from(0);
             tx.operatorTip ??= BigNumber.from(0);
             tx.factoryDeps ??= [];
@@ -609,6 +613,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
 
             const {
                 contractAddress,
+                l1Value,
                 l2Value,
                 calldata,
                 l2GasLimit,
@@ -628,16 +633,18 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
                 gasLimit: l2GasLimit
             });
 
-            overrides.value ??= baseCost.add(operatorTip).add(l2Value);
-
-            await checkBaseCost(baseCost, overrides.value);
+            await checkBaseCost(baseCost, l1Value);
 
             return await zksyncContract.populateTransaction.requestL2Transaction(
-                contractAddress,
-                l2Value,
+                l1Value,
+                {
+                    l2Contract: contractAddress,
+                    l2Value,
+                    gasAmount: baseCost.add(operatorTip),
+                    l2GasLimit,
+                    l2GasPerPubdataByteLimit: REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT
+                },
                 calldata,
-                l2GasLimit,
-                REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_LIMIT,
                 factoryDeps,
                 refundRecipient,
                 overrides
