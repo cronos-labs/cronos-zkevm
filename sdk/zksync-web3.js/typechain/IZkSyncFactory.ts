@@ -199,6 +199,25 @@ const _abi = [
       {
         indexed: true,
         internalType: "address",
+        name: "oldAllowList",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "newAllowList",
+        type: "address",
+      },
+    ],
+    name: "NewAllowList",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
         name: "oldGovernor",
         type: "address",
       },
@@ -978,6 +997,19 @@ const _abi = [
   },
   {
     inputs: [],
+    name: "getAllowList",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
     name: "getCurrentProposalId",
     outputs: [
       {
@@ -1057,6 +1089,19 @@ const _abi = [
   {
     inputs: [],
     name: "getPriorityQueueSize",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "getPriorityTxMaxGasLimit",
     outputs: [
       {
         internalType: "uint256",
@@ -1209,19 +1254,6 @@ const _abi = [
         internalType: "struct VerifierParams",
         name: "",
         type: "tuple",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "getpriorityTxMaxGasLimit",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
       },
     ],
     stateMutability: "view",
@@ -1770,29 +1802,46 @@ const _abi = [
   {
     inputs: [
       {
-        internalType: "address",
-        name: "_contractL2",
-        type: "address",
+        internalType: "uint256",
+        name: "_l1Value",
+        type: "uint256",
       },
       {
-        internalType: "uint256",
-        name: "_l2Value",
-        type: "uint256",
+        components: [
+          {
+            internalType: "address",
+            name: "l2Contract",
+            type: "address",
+          },
+          {
+            internalType: "uint256",
+            name: "l2Value",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "gasAmount",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "l2GasLimit",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "l2GasPerPubdataByteLimit",
+            type: "uint256",
+          },
+        ],
+        internalType: "struct L2TransactionValue",
+        name: "_txValue",
+        type: "tuple",
       },
       {
         internalType: "bytes",
         name: "_calldata",
         type: "bytes",
-      },
-      {
-        internalType: "uint256",
-        name: "_l2GasLimit",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "_l2GasPerPubdataByteLimit",
-        type: "uint256",
       },
       {
         internalType: "bytes[]",
@@ -1838,6 +1887,19 @@ const _abi = [
       },
     ],
     name: "securityCouncilUpgradeApprove",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "contract IAllowList",
+        name: "_newAllowList",
+        type: "address",
+      },
+    ],
+    name: "setAllowList",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
