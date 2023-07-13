@@ -155,7 +155,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
 
                 return this.requestExecute(depositTx);
             } else {
-                const bridgeContracts = await this.getL1BridgeContracts();                
+                const bridgeContracts = await this.getL1BridgeContracts();
                 if (transaction.approveERC20) {
                     const bridgeAddress = transaction.bridgeAddress
                         ? transaction.bridgeAddress
