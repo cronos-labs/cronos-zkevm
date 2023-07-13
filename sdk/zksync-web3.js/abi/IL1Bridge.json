@@ -161,6 +161,11 @@
           "internalType": "address",
           "name": "_refundRecipient",
           "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_gasAmount",
+          "type": "uint256"
         }
       ],
       "name": "deposit",

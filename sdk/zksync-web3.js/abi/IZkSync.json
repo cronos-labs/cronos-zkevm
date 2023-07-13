@@ -1785,29 +1785,46 @@
     {
       "inputs": [
         {
-          "internalType": "address",
-          "name": "_contractL2",
-          "type": "address"
+          "internalType": "uint256",
+          "name": "_l1Value",
+          "type": "uint256"
         },
         {
-          "internalType": "uint256",
-          "name": "_l2Value",
-          "type": "uint256"
+          "components": [
+            {
+              "internalType": "address",
+              "name": "l2Contract",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "l2Value",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "gasAmount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "l2GasLimit",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "l2GasPerPubdataByteLimit",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct L2TransactionValue",
+          "name": "_txValue",
+          "type": "tuple"
         },
         {
           "internalType": "bytes",
           "name": "_calldata",
           "type": "bytes"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_l2GasLimit",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_l2GasPerPubdataByteLimit",
-          "type": "uint256"
         },
         {
           "internalType": "bytes[]",
