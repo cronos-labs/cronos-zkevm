@@ -114,6 +114,7 @@ export async function deployL1(args: any[]) {
         'CONTRACTS_L1_ERC20_BRIDGE_IMPL_ADDR',
         'CONTRACTS_L1_WETH_BRIDGE_IMPL_ADDR',
         'CONTRACTS_L1_WETH_BRIDGE_PROXY_ADDR',
+        'CONTRACTS_L1_WETH_TOKEN_ADDR',
         'CONTRACTS_L1_ALLOW_LIST_ADDR'
     ];
     const updatedContracts = updateContractsEnv(deployLog, envVars);

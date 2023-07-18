@@ -25,8 +25,7 @@ export async function deployERC20(command: 'dev' | 'new', name?: string, symbol?
                 { "name": "wBTCL", "symbol": "wBTCP", "decimals":  8, "implementation": "RevertTransferERC20" },
                 { "name": "BATL",  "symbol": "BATW",  "decimals": 18 },
                 { "name": "GNTL",  "symbol": "GNTW",  "decimals": 18 },
-                { "name": "MLTTL", "symbol": "MLTTW", "decimals": 18 },
-                { "name": "Wrapped Ether", "symbol": "WETH", "decimals": 18, "implementation": "WETH9"}
+                { "name": "MLTTL", "symbol": "MLTTW", "decimals": 18 }
             ]' > ./etc/tokens/localhost.json`);
     } else if (command == 'new') {
         await utils.spawn(
