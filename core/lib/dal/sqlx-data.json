@@ -2283,6 +2283,30 @@
     },
     "query": "SELECT number, timestamp, hash, l1_tx_count, l2_tx_count, base_fee_per_gas, l1_gas_price, l2_fair_gas_price, bootloader_code_hash, default_aa_code_hash FROM miniblocks ORDER BY number DESC LIMIT 1"
   },
+  "351ef57767cd309f5ac2b013784d0c09ed3ae465f6dc2fe1132f6aa3be5e6004": {
+    "describe": {
+      "columns": [
+        {
+          "name": "gas_token_adjust_coefficient",
+          "ordinal": 0,
+          "type_info": "Numeric"
+        },
+        {
+          "name": "gas_token_adjust_coefficient_updated_at",
+          "ordinal": 1,
+          "type_info": "Timestamp"
+        }
+      ],
+      "nullable": [
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "SELECT * FROM oracle"
+  },
   "36c483775b604324eacd7e5aac591b927cc32abb89fe1b0c5cf4b0383e9bd443": {
     "describe": {
       "columns": [
@@ -10902,6 +10926,18 @@
       }
     },
     "query": "SELECT address, key, value FROM storage_logs WHERE miniblock_number BETWEEN (SELECT MIN(number) FROM miniblocks WHERE l1_batch_number = $1) AND (SELECT MAX(number) FROM miniblocks WHERE l1_batch_number = $1) ORDER BY miniblock_number, operation_number"
+  },
+  "f5ed8351ba903e922d9d50a8c0fe7ee0e5783c89ed05af25e229817f5ab91463": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Numeric"
+        ]
+      }
+    },
+    "query": "UPDATE oracle SET gas_token_adjust_coefficient = $1"
   },
   "f76f7d03cce064c0240da83a4ba75a0ce3fb57a18723c278a3d05eaf085f8994": {
     "describe": {
