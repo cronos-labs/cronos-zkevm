@@ -1,5 +1,6 @@
 //! This module determines the fees to pay in txs containing blocks submitted to the L1.
 
+use bigdecimal::ToPrimitive;
 // Built-in deps
 use num::rational::Ratio;
 use num::BigUint;
@@ -117,7 +118,8 @@ impl<E: EthInterface> GasAdjuster<E> {
 }
 
 impl<E: EthInterface> L1GasPriceProvider for GasAdjuster<E> {
-    /// Returns the sum of base and priority fee, in wei, not considering time in mempool.
+    /// Returns the sum of base, priority fee, and the gas token adjust coefficient, in wei,
+    /// not considering time in mempool.
     /// Can be used to get an estimate of current gas price.
     fn estimate_effective_gas_price(&self) -> u64 {
         if let Some(price) = self.config.internal_enforced_l1_gas_price {
@@ -126,7 +128,13 @@ impl<E: EthInterface> L1GasPriceProvider for GasAdjuster<E> {
 
         let effective_gas_price = self.get_base_fee(0) + self.get_priority_fee();
 
-        (self.config.internal_l1_pricing_multiplier * effective_gas_price as f64) as u64
+        let adj_coef = self
+            .gas_token_adjust_coef
+            .get_gas_token_adjust_coefficient()
+            .to_f64()
+            .unwrap();
+
+        (self.config.internal_l1_pricing_multiplier * adj_coef * effective_gas_price as f64) as u64
     }
 }
 
@@ -265,6 +273,10 @@ impl GasAdjustCoefficientInner {
     pub fn update_gas_token_adjust_coefficient(&mut self, ratio: &Ratio<BigUint>) {
         self.coef = ratio.clone();
     }
+
+    pub fn get_gas_token_adjust_coefficient(&self) -> Ratio<BigUint> {
+        self.coef.clone()
+    }
 }
 
 #[derive(Debug)]
@@ -280,5 +292,9 @@ impl GasAdjustCoefficient {
             .write()
             .unwrap()
             .update_gas_token_adjust_coefficient(ratio);
+    }
+
+    pub fn get_gas_token_adjust_coefficient(&self) -> Ratio<BigUint> {
+        self.0.read().unwrap().get_gas_token_adjust_coefficient()
     }
 }
