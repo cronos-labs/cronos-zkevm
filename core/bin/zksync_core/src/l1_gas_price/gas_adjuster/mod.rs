@@ -1,11 +1,14 @@
 //! This module determines the fees to pay in txs containing blocks submitted to the L1.
 
 // Built-in deps
+use num::rational::Ratio;
+use num::BigUint;
 use std::collections::VecDeque;
 use std::sync::{Arc, RwLock};
 use tokio::sync::watch::Receiver;
 
 use zksync_config::GasAdjusterConfig;
+use zksync_dal::StorageProcessor;
 use zksync_eth_client::{types::Error, EthInterface};
 
 use super::{L1GasPriceProvider, L1TxParamsProvider};
@@ -21,6 +24,7 @@ pub struct GasAdjuster<E> {
     pub(super) statistics: GasStatistics,
     pub(super) config: GasAdjusterConfig,
     eth_client: E,
+    pub(super) gas_token_adjust_coef: GasAdjustCoefficient,
 }
 
 impl<E: EthInterface> GasAdjuster<E> {
@@ -36,10 +40,15 @@ impl<E: EthInterface> GasAdjuster<E> {
         let history = eth_client
             .base_fee_history(current_block, config.max_base_fee_samples, "gas_adjuster")
             .await?;
+
+        let mut storage = StorageProcessor::establish_connection(true).await;
+        let coef = storage.oracle_dal().get_adjust_coefficient().await;
+
         Ok(Self {
             statistics: GasStatistics::new(config.max_base_fee_samples, current_block, &history),
             eth_client,
             config,
+            gas_token_adjust_coef: GasAdjustCoefficient::new(&coef),
         })
     }
 
@@ -79,6 +88,14 @@ impl<E: EthInterface> GasAdjuster<E> {
         Ok(())
     }
 
+    pub async fn update_coef(&self) -> Result<(), Error> {
+        let mut storage = StorageProcessor::establish_connection(true).await;
+        let coef = storage.oracle_dal().get_adjust_coefficient().await;
+        self.gas_token_adjust_coef
+            .update_gas_token_adjust_coefficient(&coef);
+        Ok(())
+    }
+
     pub async fn run(self: Arc<Self>, stop_receiver: Receiver<bool>) {
         loop {
             if *stop_receiver.borrow() {
@@ -88,6 +105,10 @@ impl<E: EthInterface> GasAdjuster<E> {
 
             if let Err(err) = self.keep_updated().await {
                 vlog::warn!("Cannot add the base fee to gas statistics: {}", err);
+            }
+
+            if let Err(err) = self.update_coef().await {
+                vlog::warn!("Cannot update the gas token adjust coef: {}", err);
             }
 
             tokio::time::sleep(self.config.poll_period()).await;
@@ -226,5 +247,38 @@ impl GasStatistics {
 
     pub fn last_processed_block(&self) -> usize {
         self.0.read().unwrap().last_processed_block
+    }
+}
+
+#[derive(Debug)]
+pub(super) struct GasAdjustCoefficientInner {
+    coef: Ratio<BigUint>,
+}
+
+impl GasAdjustCoefficientInner {
+    pub fn new(ratio: &Ratio<BigUint>) -> Self {
+        Self {
+            coef: ratio.clone(),
+        }
+    }
+
+    pub fn update_gas_token_adjust_coefficient(&mut self, ratio: &Ratio<BigUint>) {
+        self.coef = ratio.clone();
+    }
+}
+
+#[derive(Debug)]
+pub(super) struct GasAdjustCoefficient(RwLock<GasAdjustCoefficientInner>);
+
+impl GasAdjustCoefficient {
+    pub fn new(ratio: &Ratio<BigUint>) -> Self {
+        Self(RwLock::new(GasAdjustCoefficientInner::new(ratio)))
+    }
+
+    pub fn update_gas_token_adjust_coefficient(&self, ratio: &Ratio<BigUint>) {
+        self.0
+            .write()
+            .unwrap()
+            .update_gas_token_adjust_coefficient(ratio);
     }
 }
