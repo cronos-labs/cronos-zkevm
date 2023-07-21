@@ -89,12 +89,11 @@ impl<E: EthInterface> GasAdjuster<E> {
         Ok(())
     }
 
-    pub async fn update_coef(&self) -> Result<(), Error> {
+    pub async fn update_coef(&self) {
         let mut storage = StorageProcessor::establish_connection(true).await;
         let coef = storage.oracle_dal().get_adjust_coefficient().await;
         self.gas_token_adjust_coef
             .update_gas_token_adjust_coefficient(&coef);
-        Ok(())
     }
 
     pub async fn run(self: Arc<Self>, stop_receiver: Receiver<bool>) {
@@ -108,9 +107,7 @@ impl<E: EthInterface> GasAdjuster<E> {
                 vlog::warn!("Cannot add the base fee to gas statistics: {}", err);
             }
 
-            if let Err(err) = self.update_coef().await {
-                vlog::warn!("Cannot update the gas token adjust coef: {}", err);
-            }
+            self.update_coef().await;
 
             tokio::time::sleep(self.config.poll_period()).await;
         }
