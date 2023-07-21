@@ -54,9 +54,10 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
 
         async getL1BridgeContracts() {
             const addresses = await this._providerL2().getDefaultBridgeAddresses();
+            // TODO: wethL1 is not returned at the moment 
             return {
                 erc20: IL1BridgeFactory.connect(addresses.erc20L1, this._signerL1()),
-                weth: IL1BridgeFactory.connect(addresses.wethL1, this._signerL1())
+                weth: IL1BridgeFactory.connect(addresses.erc20L1, this._signerL1()),
             };
         }
 
@@ -246,6 +247,7 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
             overrides?: ethers.PayableOverrides;
         }): Promise<any> {
             const bridgeContracts = await this.getL1BridgeContracts();
+            
             if (transaction.bridgeAddress != null) {
                 bridgeContracts.erc20 = bridgeContracts.erc20.attach(transaction.bridgeAddress);
             }

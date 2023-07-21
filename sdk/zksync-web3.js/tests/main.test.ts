@@ -18,37 +18,46 @@ const printBalance = async (wallet: Wallet,tag: string) => {
 const test = async () => {
 
     let zkWallet = Wallet.fromMnemonic(MNEMONIC, DERIVE_PATH);
-    zkWallet = zkWallet.connect(new Provider("http://localhost:3050"));
-    zkWallet = zkWallet.connectToL1(new ethers.providers.JsonRpcProvider("http://localhost:8545"));
+    zkWallet = zkWallet.connect(new Provider("http://10.202.3.175:3050"));
+    zkWallet = zkWallet.connectToL1(new ethers.providers.JsonRpcProvider("https://rpc.sepolia.org"));
 
-    await printBalance(zkWallet, "before deposit")
 
-    const tx = await zkWallet.deposit({
+    const fee = await zkWallet.getFullRequiredDepositFee({
         token: utils.ETH_ADDRESS,
-        amount: ethers.utils.parseEther("10"),
-        overrides: {
-            gasLimit: 1000000,
-        }
-    });
-    await tx.waitFinalize();
-
-    await printBalance(zkWallet, "after deposit")
-
-
-    const withdrawTx = await zkWallet.withdraw({
-        token: utils.ETH_ADDRESS,
-        amount: ethers.utils.parseEther("10"),
-        overrides: {
-            gasLimit: 1000000,
-        }
+        to: zkWallet.address,
     })
-    const receipt = await withdrawTx.waitFinalize();
+
+    console.log(fee);
     
-    const finalizeWithdrawTx = await zkWallet.finalizeWithdrawal(receipt.transactionHash)
 
-    await finalizeWithdrawTx.wait();
+    // await printBalance(zkWallet, "before deposit")
 
-    await printBalance(zkWallet, "after withdraw")
+    // const tx = await zkWallet.deposit({
+    //     token: utils.ETH_ADDRESS,
+    //     amount: ethers.utils.parseEther("10"),
+    //     overrides: {
+    //         gasLimit: 1000000,
+    //     }
+    // });
+    // await tx.waitFinalize();
+
+    // await printBalance(zkWallet, "after deposit")
+
+
+    // const withdrawTx = await zkWallet.withdraw({
+    //     token: utils.ETH_ADDRESS,
+    //     amount: ethers.utils.parseEther("10"),
+    //     overrides: {
+    //         gasLimit: 1000000,
+    //     }
+    // })
+    // const receipt = await withdrawTx.waitFinalize();
+    
+    // const finalizeWithdrawTx = await zkWallet.finalizeWithdrawal(receipt.transactionHash)
+
+    // await finalizeWithdrawTx.wait();
+
+    // await printBalance(zkWallet, "after withdraw")
 }
 
 test();
