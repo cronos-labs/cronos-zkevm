@@ -14,7 +14,6 @@ import {
   Contract,
   ContractTransaction,
   Overrides,
-  PayableOverrides,
   CallOverrides,
 } from "@ethersproject/contracts";
 import { BytesLike } from "@ethersproject/bytes";
@@ -1460,7 +1459,7 @@ export class IZkSync extends Contract {
       _calldata: BytesLike,
       _factoryDeps: BytesLike[],
       _refundRecipient: string,
-      overrides?: PayableOverrides
+      overrides?: Overrides
     ): Promise<ContractTransaction>;
 
     "requestL2Transaction(uint256,(address,uint256,uint256,uint256,uint256),bytes,bytes[],address)"(
@@ -1475,7 +1474,7 @@ export class IZkSync extends Contract {
       _calldata: BytesLike,
       _factoryDeps: BytesLike[],
       _refundRecipient: string,
-      overrides?: PayableOverrides
+      overrides?: Overrides
     ): Promise<ContractTransaction>;
 
     revertBlocks(
@@ -2209,7 +2208,7 @@ export class IZkSync extends Contract {
     _calldata: BytesLike,
     _factoryDeps: BytesLike[],
     _refundRecipient: string,
-    overrides?: PayableOverrides
+    overrides?: Overrides
   ): Promise<ContractTransaction>;
 
   "requestL2Transaction(uint256,(address,uint256,uint256,uint256,uint256),bytes,bytes[],address)"(
@@ -2224,7 +2223,7 @@ export class IZkSync extends Contract {
     _calldata: BytesLike,
     _factoryDeps: BytesLike[],
     _refundRecipient: string,
-    overrides?: PayableOverrides
+    overrides?: Overrides
   ): Promise<ContractTransaction>;
 
   revertBlocks(
@@ -3785,7 +3784,7 @@ export class IZkSync extends Contract {
       _calldata: BytesLike,
       _factoryDeps: BytesLike[],
       _refundRecipient: string,
-      overrides?: PayableOverrides
+      overrides?: Overrides
     ): Promise<BigNumber>;
 
     "requestL2Transaction(uint256,(address,uint256,uint256,uint256,uint256),bytes,bytes[],address)"(
@@ -3800,7 +3799,7 @@ export class IZkSync extends Contract {
       _calldata: BytesLike,
       _factoryDeps: BytesLike[],
       _refundRecipient: string,
-      overrides?: PayableOverrides
+      overrides?: Overrides
     ): Promise<BigNumber>;
 
     revertBlocks(
@@ -4563,7 +4562,7 @@ export class IZkSync extends Contract {
       _calldata: BytesLike,
       _factoryDeps: BytesLike[],
       _refundRecipient: string,
-      overrides?: PayableOverrides
+      overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
     "requestL2Transaction(uint256,(address,uint256,uint256,uint256,uint256),bytes,bytes[],address)"(
@@ -4578,7 +4577,7 @@ export class IZkSync extends Contract {
       _calldata: BytesLike,
       _factoryDeps: BytesLike[],
       _refundRecipient: string,
-      overrides?: PayableOverrides
+      overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
     revertBlocks(

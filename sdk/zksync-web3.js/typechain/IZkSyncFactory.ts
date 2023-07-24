@@ -1862,7 +1862,7 @@ const _abi = [
         type: "bytes32",
       },
     ],
-    stateMutability: "payable",
+    stateMutability: "nonpayable",
     type: "function",
   },
   {

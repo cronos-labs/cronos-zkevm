@@ -181,7 +181,7 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "_gasAmount",
+        name: "_l1Amount",
         type: "uint256",
       },
     ],
@@ -193,7 +193,7 @@ const _abi = [
         type: "bytes32",
       },
     ],
-    stateMutability: "payable",
+    stateMutability: "nonpayable",
     type: "function",
   },
   {

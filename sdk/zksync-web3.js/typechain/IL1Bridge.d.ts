@@ -14,7 +14,6 @@ import {
   Contract,
   ContractTransaction,
   Overrides,
-  PayableOverrides,
   CallOverrides,
 } from "@ethersproject/contracts";
 import { BytesLike } from "@ethersproject/bytes";
@@ -142,8 +141,8 @@ export class IL1Bridge extends Contract {
       _l2TxGasLimit: BigNumberish,
       _l2TxGasPerPubdataByte: BigNumberish,
       _refundRecipient: string,
-      _gasAmount: BigNumberish,
-      overrides?: PayableOverrides
+      _l1Amount: BigNumberish,
+      overrides?: Overrides
     ): Promise<ContractTransaction>;
 
     "deposit(address,address,uint256,uint256,uint256,address,uint256)"(
@@ -153,8 +152,8 @@ export class IL1Bridge extends Contract {
       _l2TxGasLimit: BigNumberish,
       _l2TxGasPerPubdataByte: BigNumberish,
       _refundRecipient: string,
-      _gasAmount: BigNumberish,
-      overrides?: PayableOverrides
+      _l1Amount: BigNumberish,
+      overrides?: Overrides
     ): Promise<ContractTransaction>;
 
     finalizeWithdrawal(
@@ -243,8 +242,8 @@ export class IL1Bridge extends Contract {
     _l2TxGasLimit: BigNumberish,
     _l2TxGasPerPubdataByte: BigNumberish,
     _refundRecipient: string,
-    _gasAmount: BigNumberish,
-    overrides?: PayableOverrides
+    _l1Amount: BigNumberish,
+    overrides?: Overrides
   ): Promise<ContractTransaction>;
 
   "deposit(address,address,uint256,uint256,uint256,address,uint256)"(
@@ -254,8 +253,8 @@ export class IL1Bridge extends Contract {
     _l2TxGasLimit: BigNumberish,
     _l2TxGasPerPubdataByte: BigNumberish,
     _refundRecipient: string,
-    _gasAmount: BigNumberish,
-    overrides?: PayableOverrides
+    _l1Amount: BigNumberish,
+    overrides?: Overrides
   ): Promise<ContractTransaction>;
 
   finalizeWithdrawal(
@@ -329,7 +328,7 @@ export class IL1Bridge extends Contract {
       _l2TxGasLimit: BigNumberish,
       _l2TxGasPerPubdataByte: BigNumberish,
       _refundRecipient: string,
-      _gasAmount: BigNumberish,
+      _l1Amount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<string>;
 
@@ -340,7 +339,7 @@ export class IL1Bridge extends Contract {
       _l2TxGasLimit: BigNumberish,
       _l2TxGasPerPubdataByte: BigNumberish,
       _refundRecipient: string,
-      _gasAmount: BigNumberish,
+      _l1Amount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<string>;
 
@@ -441,8 +440,8 @@ export class IL1Bridge extends Contract {
       _l2TxGasLimit: BigNumberish,
       _l2TxGasPerPubdataByte: BigNumberish,
       _refundRecipient: string,
-      _gasAmount: BigNumberish,
-      overrides?: PayableOverrides
+      _l1Amount: BigNumberish,
+      overrides?: Overrides
     ): Promise<BigNumber>;
 
     "deposit(address,address,uint256,uint256,uint256,address,uint256)"(
@@ -452,8 +451,8 @@ export class IL1Bridge extends Contract {
       _l2TxGasLimit: BigNumberish,
       _l2TxGasPerPubdataByte: BigNumberish,
       _refundRecipient: string,
-      _gasAmount: BigNumberish,
-      overrides?: PayableOverrides
+      _l1Amount: BigNumberish,
+      overrides?: Overrides
     ): Promise<BigNumber>;
 
     finalizeWithdrawal(
@@ -531,8 +530,8 @@ export class IL1Bridge extends Contract {
       _l2TxGasLimit: BigNumberish,
       _l2TxGasPerPubdataByte: BigNumberish,
       _refundRecipient: string,
-      _gasAmount: BigNumberish,
-      overrides?: PayableOverrides
+      _l1Amount: BigNumberish,
+      overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
     "deposit(address,address,uint256,uint256,uint256,address,uint256)"(
@@ -542,8 +541,8 @@ export class IL1Bridge extends Contract {
       _l2TxGasLimit: BigNumberish,
       _l2TxGasPerPubdataByte: BigNumberish,
       _refundRecipient: string,
-      _gasAmount: BigNumberish,
-      overrides?: PayableOverrides
+      _l1Amount: BigNumberish,
+      overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
     finalizeWithdrawal(
