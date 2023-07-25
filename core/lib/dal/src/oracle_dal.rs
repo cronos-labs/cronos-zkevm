@@ -12,8 +12,9 @@ pub struct OracleDal<'a, 'c> {
 impl OracleDal<'_, '_> {
     pub async fn update_adjust_coefficient(&mut self, adjust_coefficient: &Ratio<BigUint>) {
         sqlx::query!(
-            "UPDATE oracle \
-            SET gas_token_adjust_coefficient = $1",
+            "INSERT INTO oracle VALUES (1, $1, now()) \
+             ON CONFLICT (id) \
+             DO UPDATE SET gas_token_adjust_coefficient = $1, gas_token_adjust_coefficient_updated_at = now()",
             ratio_to_big_decimal(adjust_coefficient, COEFFICIENT_PRECISION)
         )
         .execute(self.storage.conn())
@@ -22,7 +23,7 @@ impl OracleDal<'_, '_> {
     }
 
     pub async fn get_adjust_coefficient(&mut self) -> Ratio<BigUint> {
-        let oracle = sqlx::query!("SELECT * FROM oracle")
+        let oracle = sqlx::query!("SELECT gas_token_adjust_coefficient FROM oracle")
             .fetch_one(self.storage.conn())
             .await
             .unwrap();
