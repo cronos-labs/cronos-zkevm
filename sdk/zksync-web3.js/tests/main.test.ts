@@ -19,7 +19,7 @@ const test = async () => {
 
     let zkWallet = Wallet.fromMnemonic(MNEMONIC, DERIVE_PATH);
     zkWallet = zkWallet.connect(new Provider("http://10.202.3.175:3050"));
-    zkWallet = zkWallet.connectToL1(new ethers.providers.JsonRpcProvider("https://rpc.sepolia.org"));
+    zkWallet = zkWallet.connectToL1(new ethers.providers.JsonRpcProvider("https://eth-sepolia.public.blastapi.io"));
 
     const fee = await zkWallet.getFullRequiredDepositFee({
         token: utils.ETH_ADDRESS,
