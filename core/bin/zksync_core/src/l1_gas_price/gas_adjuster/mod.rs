@@ -43,7 +43,7 @@ impl<E: EthInterface> GasAdjuster<E> {
             .await?;
 
         let mut storage = StorageProcessor::establish_connection(true).await;
-        let coef = storage.oracle_dal().get_adjust_coefficient().await;
+        let coef = storage.oracle_dal().get_adjust_coefficient().await.unwrap();
 
         Ok(Self {
             statistics: GasStatistics::new(config.max_base_fee_samples, current_block, &history),
@@ -91,7 +91,7 @@ impl<E: EthInterface> GasAdjuster<E> {
 
     pub async fn update_coef(&self) {
         let mut storage = StorageProcessor::establish_connection(true).await;
-        let coef = storage.oracle_dal().get_adjust_coefficient().await;
+        let coef = storage.oracle_dal().get_adjust_coefficient().await.unwrap();
         self.gas_token_adjust_coef
             .update_gas_token_adjust_coefficient(&coef);
     }

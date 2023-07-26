@@ -35,7 +35,7 @@ pub struct MainNodeGasPriceFetcher {
 impl MainNodeGasPriceFetcher {
     pub async fn new(main_node_url: &str) -> Self {
         let mut storage = StorageProcessor::establish_connection(true).await;
-        let coef = storage.oracle_dal().get_adjust_coefficient().await;
+        let coef = storage.oracle_dal().get_adjust_coefficient().await.unwrap();
 
         Self {
             client: Self::build_client(main_node_url),
@@ -52,7 +52,7 @@ impl MainNodeGasPriceFetcher {
 
     async fn update_coef(&self) {
         let mut storage = StorageProcessor::establish_connection(true).await;
-        let coef = storage.oracle_dal().get_adjust_coefficient().await;
+        let coef = storage.oracle_dal().get_adjust_coefficient().await.unwrap();
         self.gas_token_adjust_coef
             .update_gas_token_adjust_coefficient(&coef);
     }

@@ -1,4 +1,4 @@
-use crate::StorageProcessor;
+use crate::{SqlxError, StorageProcessor};
 use num::{rational::Ratio, BigUint};
 use zksync_utils::{big_decimal_to_ratio, ratio_to_big_decimal};
 
@@ -22,12 +22,11 @@ impl OracleDal<'_, '_> {
         .unwrap();
     }
 
-    pub async fn get_adjust_coefficient(&mut self) -> Ratio<BigUint> {
+    pub async fn get_adjust_coefficient(&mut self) -> Result<Ratio<BigUint>, SqlxError> {
         let oracle = sqlx::query!("SELECT gas_token_adjust_coefficient FROM oracle")
             .fetch_one(self.storage.conn())
-            .await
-            .unwrap();
+            .await?;
 
-        big_decimal_to_ratio(&oracle.gas_token_adjust_coefficient).unwrap()
+        Ok(big_decimal_to_ratio(&oracle.gas_token_adjust_coefficient).unwrap())
     }
 }
