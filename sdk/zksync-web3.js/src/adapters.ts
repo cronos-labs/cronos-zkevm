@@ -54,7 +54,6 @@ export function AdapterL1<TBase extends Constructor<TxSender>>(Base: TBase) {
 
         async getL1BridgeContracts() {
             const addresses = await this._providerL2().getDefaultBridgeAddresses();
-            // TODO: wethL1 is not returned at the moment 
             return {
                 erc20: IL1BridgeFactory.connect(addresses.erc20L1, this._signerL1()),
                 weth: IL1BridgeFactory.connect(addresses.erc20L1, this._signerL1()),
