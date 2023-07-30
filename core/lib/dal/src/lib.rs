@@ -22,6 +22,7 @@ use crate::fri_prover_dal::FriProverDal;
 use crate::fri_scheduler_dependency_tracker_dal::FriSchedulerDependencyTrackerDal;
 use crate::fri_witness_generator_dal::FriWitnessGeneratorDal;
 use crate::gpu_prover_queue_dal::GpuProverQueueDal;
+use crate::oracle_dal::OracleDal;
 use crate::prover_dal::ProverDal;
 use crate::storage_dal::StorageDal;
 use crate::storage_logs_dal::StorageLogsDal;
@@ -49,6 +50,7 @@ pub mod fri_witness_generator_dal;
 pub mod gpu_prover_queue_dal;
 pub mod healthcheck;
 mod models;
+pub mod oracle_dal;
 pub mod prover_dal;
 pub mod storage_dal;
 pub mod storage_logs_dal;
@@ -247,5 +249,8 @@ impl<'a> StorageProcessor<'a> {
         &mut self,
     ) -> FriSchedulerDependencyTrackerDal<'_, 'a> {
         FriSchedulerDependencyTrackerDal { storage: self }
+    }
+    pub fn oracle_dal(&mut self) -> OracleDal<'_, 'a> {
+        OracleDal { storage: self }
     }
 }

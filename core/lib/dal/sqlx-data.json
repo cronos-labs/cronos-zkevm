@@ -877,6 +877,24 @@
     },
     "query": "SELECT sent_at_block FROM eth_txs_history WHERE eth_tx_id = $1 AND sent_at_block IS NOT NULL ORDER BY created_at ASC LIMIT 1"
   },
+  "1a263861d700cbfa50fac265da5535b9edb0d33f4428a295b1a66d30621db9b0": {
+    "describe": {
+      "columns": [
+        {
+          "name": "gas_token_adjust_coefficient",
+          "ordinal": 0,
+          "type_info": "Numeric"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "SELECT gas_token_adjust_coefficient FROM oracle"
+  },
   "1a91acea72e56513a2a9e667bd5a2c171baa5fec01c51dcb7c7cf33f736c854d": {
     "describe": {
       "columns": [
@@ -2694,6 +2712,18 @@
       }
     },
     "query": "\n                    UPDATE transactions\n                    SET \n                        l1_batch_number = $3,\n                        l1_batch_tx_index = data_table.l1_batch_tx_index,\n                        updated_at = now()\n                    FROM\n                        (SELECT\n                                UNNEST($1::int[]) AS l1_batch_tx_index,\n                                UNNEST($2::bytea[]) AS hash\n                        ) AS data_table\n                    WHERE transactions.hash=data_table.hash \n                "
+  },
+  "3c800b8c221baf1a48573d20d9d0d0ec625434b044407a940f38f921f5973db2": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Numeric"
+        ]
+      }
+    },
+    "query": "INSERT INTO oracle VALUES (1, $1, now()) ON CONFLICT (id) DO UPDATE SET gas_token_adjust_coefficient = $1, gas_token_adjust_coefficient_updated_at = now()"
   },
   "3ccd4d053bb664a40c3887ef4f87fe2d4aa8be36e6c84c5f1d358ce712072082": {
     "describe": {
