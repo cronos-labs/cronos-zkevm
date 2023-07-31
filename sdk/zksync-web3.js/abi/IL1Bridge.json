@@ -161,6 +161,11 @@
           "internalType": "address",
           "name": "_refundRecipient",
           "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_l1Amount",
+          "type": "uint256"
         }
       ],
       "name": "deposit",
@@ -171,7 +176,7 @@
           "type": "bytes32"
         }
       ],
-      "stateMutability": "payable",
+      "stateMutability": "nonpayable",
       "type": "function"
     },
     {
