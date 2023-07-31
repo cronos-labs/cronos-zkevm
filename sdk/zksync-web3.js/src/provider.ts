@@ -45,8 +45,6 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         mainContract?: Address;
         erc20BridgeL1?: Address;
         erc20BridgeL2?: Address;
-        wethBridgeL1?: Address;
-        wethBridgeL2?: Address;
     };
 
     // NOTE: this is almost a complete copy-paste of the parent poll method
@@ -377,13 +375,6 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         }
 
         const bridgeAddresses = await this.getDefaultBridgeAddresses();
-        const l2WethBridge = IL2BridgeFactory.connect(bridgeAddresses.wethL2, this);
-        const l2WethToken = await l2WethBridge.l2TokenAddress(token);
-        // If the token is Wrapped Ether, return its L2 token address
-        if (l2WethToken != ethers.constants.AddressZero) {
-            return l2WethToken;
-        }
-
         const l2Erc20Bridge = IL2BridgeFactory.connect(bridgeAddresses.erc20L2, this);
         return await l2Erc20Bridge.l2TokenAddress(token);
     }
@@ -394,13 +385,6 @@ export class Provider extends ethers.providers.JsonRpcProvider {
         }
 
         const bridgeAddresses = await this.getDefaultBridgeAddresses();
-        const l2WethBridge = IL2BridgeFactory.connect(bridgeAddresses.wethL2, this);
-        const l1WethToken = await l2WethBridge.l1TokenAddress(token);
-        // If the token is Wrapped Ether, return its L1 token address
-        if (l1WethToken != ethers.constants.AddressZero) {
-            return l1WethToken;
-        }
-
         const erc20Bridge = IL2BridgeFactory.connect(bridgeAddresses.erc20L2, this);
         return await erc20Bridge.l1TokenAddress(token);
     }
@@ -542,14 +526,10 @@ export class Provider extends ethers.providers.JsonRpcProvider {
             let addresses = await this.send('zks_getBridgeContracts', []);
             this.contractAddresses.erc20BridgeL1 = addresses.l1Erc20DefaultBridge;
             this.contractAddresses.erc20BridgeL2 = addresses.l2Erc20DefaultBridge;
-            this.contractAddresses.wethBridgeL1 = addresses.l1WethBridge;
-            this.contractAddresses.wethBridgeL2 = addresses.l2WethBridge;
         }
         return {
             erc20L1: this.contractAddresses.erc20BridgeL1,
             erc20L2: this.contractAddresses.erc20BridgeL2,
-            wethL1: this.contractAddresses.wethBridgeL1,
-            wethL2: this.contractAddresses.wethBridgeL2
         };
     }
 
@@ -629,11 +609,7 @@ export class Provider extends ethers.providers.JsonRpcProvider {
 
         if (tx.bridgeAddress == null) {
             const bridgeAddresses = await this.getDefaultBridgeAddresses();
-            const l2WethBridge = IL2BridgeFactory.connect(bridgeAddresses.wethL2, this);
-            const l1WethToken = await l2WethBridge.l1TokenAddress(tx.token);
-
-            tx.bridgeAddress =
-                l1WethToken != ethers.constants.AddressZero ? bridgeAddresses.wethL2 : bridgeAddresses.erc20L2;
+            tx.bridgeAddress = bridgeAddresses.erc20L2;
         }
 
         const bridge = IL2BridgeFactory.connect(tx.bridgeAddress!, this);
