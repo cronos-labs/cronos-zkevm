@@ -56,8 +56,6 @@ impl InternalApiConfig {
             bridge_addresses: api::BridgeAddresses {
                 l1_erc20_default_bridge: contracts_config.l1_erc20_bridge_proxy_addr,
                 l2_erc20_default_bridge: contracts_config.l2_erc20_bridge_addr,
-                l1_weth_bridge: contracts_config.l1_weth_bridge_proxy_addr,
-                l2_weth_bridge: contracts_config.l2_weth_bridge_addr,
             },
             diamond_proxy_addr: contracts_config.diamond_proxy_addr,
             l2_testnet_paymaster_addr: contracts_config.l2_testnet_paymaster_addr,

@@ -19,8 +19,6 @@ pub struct RemoteENConfig {
     pub diamond_proxy_addr: Address,
     pub l1_erc20_bridge_proxy_addr: Address,
     pub l2_erc20_bridge_addr: Address,
-    pub l1_weth_bridge_proxy_addr: Option<Address>,
-    pub l2_weth_bridge_addr: Option<Address>,
     pub l2_testnet_paymaster_addr: Option<Address>,
     pub l2_chain_id: L2ChainId,
     pub l1_chain_id: L1ChainId,
@@ -60,8 +58,6 @@ impl RemoteENConfig {
             l2_testnet_paymaster_addr,
             l1_erc20_bridge_proxy_addr: bridges.l1_erc20_default_bridge,
             l2_erc20_bridge_addr: bridges.l2_erc20_default_bridge,
-            l1_weth_bridge_proxy_addr: bridges.l1_weth_bridge,
-            l2_weth_bridge_addr: bridges.l2_weth_bridge,
             l2_chain_id,
             l1_chain_id,
         })
@@ -323,8 +319,6 @@ impl From<ExternalNodeConfig> for InternalApiConfig {
             bridge_addresses: BridgeAddresses {
                 l1_erc20_default_bridge: config.remote.l1_erc20_bridge_proxy_addr,
                 l2_erc20_default_bridge: config.remote.l2_erc20_bridge_addr,
-                l1_weth_bridge: config.remote.l1_weth_bridge_proxy_addr,
-                l2_weth_bridge: config.remote.l2_weth_bridge_addr,
             },
             diamond_proxy_addr: config.remote.diamond_proxy_addr,
             l2_testnet_paymaster_addr: config.remote.l2_testnet_paymaster_addr,
