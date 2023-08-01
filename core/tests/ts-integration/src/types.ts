@@ -45,10 +45,6 @@ export interface TestEnvironment {
      * Description of the "main" ERC20 token used in the tests.
      */
     erc20Token: Token;
-    /**
-     * Description of the WETH token used in the tests.
-     */
-    wethToken: Token;
 }
 
 /**

@@ -68,25 +68,12 @@ export async function deployL2(args: any[] = []) {
 
     await utils.spawn(`${baseCommandL2} deploy-testnet-paymaster ${args.join(' ')} | tee -a deployL2.log`);
 
-    await utils.spawn(`${baseCommandL2} deploy-l2-weth ${args.join(' ')} | tee -a deployL2.log`);
-
     const l2DeployLog = fs.readFileSync('deployL2.log').toString();
     const l2DeploymentEnvVars = [
-        'CONTRACTS_L2_ETH_BRIDGE_ADDR',
         'CONTRACTS_L2_ERC20_BRIDGE_ADDR',
-        'CONTRACTS_L2_TESTNET_PAYMASTER_ADDR',
-        'CONTRACTS_L2_WETH_TOKEN_IMPL_ADDR',
-        'CONTRACTS_L2_WETH_TOKEN_PROXY_ADDR'
+        'CONTRACTS_L2_TESTNET_PAYMASTER_ADDR'
     ];
     updateContractsEnv(l2DeployLog, l2DeploymentEnvVars);
-
-    await utils.spawn(`${baseCommandL1} initialize-weth-bridges ${args.join(' ')} | tee -a deployL1.log`);
-
-    const l1DeployLog = fs.readFileSync('deployL1.log').toString();
-    const l1DeploymentEnvVars = ['CONTRACTS_L2_WETH_BRIDGE_ADDR'];
-    updateContractsEnv(l1DeployLog, l1DeploymentEnvVars);
-
-    await utils.spawn(`${baseCommandL1} initialize-l2-weth-token instant-call ${args.join(' ')} | tee -a deployL2.log`);
 }
 
 export async function deployL1(args: any[]) {
@@ -112,9 +99,6 @@ export async function deployL1(args: any[]) {
         'CONTRACTS_GENESIS_TX_HASH',
         'CONTRACTS_L1_ERC20_BRIDGE_PROXY_ADDR',
         'CONTRACTS_L1_ERC20_BRIDGE_IMPL_ADDR',
-        'CONTRACTS_L1_WETH_BRIDGE_IMPL_ADDR',
-        'CONTRACTS_L1_WETH_BRIDGE_PROXY_ADDR',
-        'CONTRACTS_L1_WETH_TOKEN_ADDR',
         'CONTRACTS_L1_ALLOW_LIST_ADDR'
     ];
     const updatedContracts = updateContractsEnv(deployLog, envVars);

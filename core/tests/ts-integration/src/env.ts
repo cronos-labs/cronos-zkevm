@@ -80,7 +80,6 @@ export async function loadTestEnvironment(): Promise<TestEnvironment> {
     if (!token) {
         token = tokens[0];
     }
-    const weth = tokens.find((token: { symbol: string }) => token.symbol == 'WETH')!;
 
     // `waitForServer` is expected to be executed. Otherwise this call may throw.
     const l2TokenAddress = await new zksync.Wallet(
@@ -88,12 +87,6 @@ export async function loadTestEnvironment(): Promise<TestEnvironment> {
         new zksync.Provider(l2NodeUrl),
         ethers.getDefaultProvider(l1NodeUrl)
     ).l2TokenAddress(token.address);
-
-    const l2WethAddress = await new zksync.Wallet(
-        mainWalletPK,
-        new zksync.Provider(l2NodeUrl),
-        ethers.getDefaultProvider(l1NodeUrl)
-    ).l2TokenAddress(weth.address);
 
     return {
         network,
@@ -108,13 +101,6 @@ export async function loadTestEnvironment(): Promise<TestEnvironment> {
             decimals: token.decimals,
             l1Address: token.address,
             l2Address: l2TokenAddress
-        },
-        wethToken: {
-            name: weth.name,
-            symbol: weth.symbol,
-            decimals: weth.decimals,
-            l1Address: weth.address,
-            l2Address: l2WethAddress
         }
     };
 }
