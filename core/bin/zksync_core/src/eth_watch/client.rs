@@ -57,6 +57,7 @@ pub trait EthClient {
 pub const RETRY_LIMIT: usize = 5;
 const TOO_MANY_RESULTS_INFURA: &str = "query returned more than";
 const TOO_MANY_RESULTS_ALCHEMY: &str = "response size exceeded";
+const TOO_MANY_RESULTS_CRONOS: &str = "maximum [from, to]";
 
 #[derive(Debug)]
 pub struct EthHttpQueryClient<E> {
@@ -143,6 +144,7 @@ impl<E: EthInterface + Send + Sync + 'static> EthClient for EthHttpQueryClient<E
             // check whether the error is related to having too many results
             if err_message.contains(TOO_MANY_RESULTS_INFURA)
                 || err_message.contains(TOO_MANY_RESULTS_ALCHEMY)
+                || err_message.contains(TOO_MANY_RESULTS_CRONOS)
             {
                 // get the numeric block ids
                 let from_number = match from {
