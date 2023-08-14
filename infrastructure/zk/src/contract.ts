@@ -126,7 +126,7 @@ export async function deployL1(args: any[]) {
 
 export async function redeployL1(args: any[]) {
     await deployL1(args);
-    await verifyL1Contracts();
+   //await verifyL1Contracts();
 }
 
 export const command = new Command('contract').description('contract management');

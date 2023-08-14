@@ -37,7 +37,7 @@ export async function init(skipSubmodulesCheckout: boolean) {
     await announced('Clean rocksdb', clean('db'));
     await announced('Clean backups', clean('backups'));
     await announced('Building contracts', contract.build());
-    await announced('Deploying localhost ERC20 tokens', run.deployERC20('dev'));
+    //await announced('Deploying localhost ERC20 tokens', run.deployERC20('dev'));
     await announced('Running server genesis setup', server.genesisFromSources());
     await announced('Deploying L1 contracts', contract.redeployL1([]));
     await announced('Initializing validator', contract.initializeValidator());
