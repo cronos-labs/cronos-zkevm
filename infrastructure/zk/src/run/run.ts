@@ -39,10 +39,10 @@ export async function deployERC20(
                 { "name": "BATL",  "symbol": "BATW",  "decimals": 18 },
                 { "name": "GNTL",  "symbol": "GNTW",  "decimals": 18 },
                 { "name": "MLTTL", "symbol": "MLTTW", "decimals": 18 },
-                { "name": "Wrapped Ether", "symbol": "WETH", "decimals": 18, "implementation": "WETH9"}
+                { "name": "Cronos", "symbol": "CRO", "decimals": 18, "implementation": "Cronos"}
             ]' ${args.join(' ')} > ./etc/tokens/${destinationFile}.json`);
-        const WETH = getTokens(destinationFile).find((token) => token.symbol === 'WETH')!;
-        env.modify('CONTRACTS_L1_WETH_TOKEN_ADDR', `CONTRACTS_L1_WETH_TOKEN_ADDR=${WETH.address}`);
+        const CRO = getTokens(destinationFile).find((token) => token.symbol === 'CRO')!;
+        env.modify('CONTRACTS_L1_CRO_TOKEN_ADDR', `CONTRACTS_L1_CRO_TOKEN_ADDR=${CRO.address}`);
     } else if (command == 'new') {
         await utils.spawn(
             `yarn --silent --cwd contracts/ethereum deploy-erc20 add --token-name ${name} --symbol ${symbol} --decimals ${decimals}`
