@@ -69,8 +69,7 @@ export async function init(initArgs: InitArgs = DEFAULT_ARGS) {
     await announced(
         'Initializing governance',
         contract.initializeGovernance([
-            ...governorPrivateKeyArgs,
-            !deployerL2ContractInput.includeL2WETH ? ['--skip-weth-bridge'] : []
+            ...governorPrivateKeyArgs
         ])
     );
 }
@@ -167,7 +166,7 @@ const DEFAULT_ARGS: InitArgs = {
     skipEnvSetup: false,
     skipPlonkStep: false,
     governorPrivateKeyArgs: [],
-    deployerL2ContractInput: { args: [], includePaymaster: true, includeL2WETH: true },
+    deployerL2ContractInput: { args: [], includePaymaster: true, includeL2WETH: false },
     testTokens: { deploy: true, args: [] }
 };
 
@@ -181,7 +180,7 @@ export const initCommand = new Command('init')
             skipEnvSetup: cmd.skipEnvSetup,
             skipPlonkStep: false,
             governorPrivateKeyArgs: [],
-            deployerL2ContractInput: { args: [], includePaymaster: true, includeL2WETH: true },
+            deployerL2ContractInput: { args: [], includePaymaster: true, includeL2WETH: false },
             testTokens: { deploy: true, args: [] }
         };
         await init(initArgs);
