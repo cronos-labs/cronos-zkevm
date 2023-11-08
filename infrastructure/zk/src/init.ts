@@ -162,7 +162,7 @@ const DEFAULT_ARGS: InitArgs = {
     skipEnvSetup: false,
     deployerL1ContractInputArgs: [],
     governorPrivateKeyArgs: [],
-    deployerL2ContractInput: { args: [], includePaymaster: true, includeL2WETH: true },
+    deployerL2ContractInput: { args: [], includePaymaster: true, includeL2WETH: false },
     testTokens: { deploy: true, args: [] }
 };
 
@@ -176,7 +176,7 @@ export const initCommand = new Command('init')
             skipEnvSetup: cmd.skipEnvSetup,
             deployerL1ContractInputArgs: [],
             governorPrivateKeyArgs: [],
-            deployerL2ContractInput: { args: [], includePaymaster: true, includeL2WETH: true },
+            deployerL2ContractInput: { args: [], includePaymaster: true, includeL2WETH: false },
             testTokens: { deploy: true, args: [] }
         };
         await init(initArgs);
