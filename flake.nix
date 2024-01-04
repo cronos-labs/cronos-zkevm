@@ -12,7 +12,10 @@
     ...
   }:
     flake-utils.lib.eachDefaultSystem (system: let
-      pkgs = nixpkgs.legacyPackages.${system};
+      pkgs = import nixpkgs {
+        inherit system;
+        config.allowUnfree = true;
+      };
 
       inherit (pkgs.lib) cleanSourceWith;
 
@@ -43,11 +46,16 @@
         buildInputs = [
           openssl
           rocksdb
+          cudaPackages_12.cudatoolkit
         ];
-        nativeBuildInputs = [pkg-config];
+        nativeBuildInputs = [pkg-config cmake];
 
         BINDGEN_EXTRA_CLANG_ARGS = ''-I"${libclang.lib}/lib/clang/16/include"'';
         LIBCLANG_PATH = lib.makeLibraryPath [libclang.lib];
+
+        CUDAARCHS = "all";
+        CUDA_PATH = cudaPackages_12.cudatoolkit;
+        CUDA_VERSION = "12.0.1";
       };
 
       cargoArtifacts = craneLib.buildDepsOnly (commonArgs
@@ -58,9 +66,20 @@
         // {
           inherit cargoArtifacts;
 
-          cargoExtraArgs = "--bin zksync_prover_fri";
+          cargoExtraArgs = "--features gpu --bin zksync_prover_fri";
         });
     in {
       packages.prover = prover;
+      devShell = with pkgs;
+        mkShell {
+          nativeBuildInputs = [fenix.packages.${system}.default.toolchain cmake pkg-config openssl rocksdb cudaPackages_12.cudatoolkit];
+
+          BINDGEN_EXTRA_CLANG_ARGS = ''-I"${libclang.lib}/lib/clang/16/include"'';
+          LIBCLANG_PATH = lib.makeLibraryPath [libclang.lib];
+
+          CUDAARCHS = "all";
+          CUDA_PATH = cudaPackages_12.cudatoolkit;
+          CUDA_VERSION = "12.0.1";
+        };
     });
 }

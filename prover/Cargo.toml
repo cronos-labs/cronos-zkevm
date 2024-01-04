@@ -24,3 +24,7 @@ inherits = "release"
 debug = true
 [patch."https://github.com/matter-labs/era-boojum"]
 boojum = { git = 'https://github.com/whs-dot-hk/era-boojum', branch = 'test' }
+[patch."https://github.com/matter-labs/era-cuda.git"]
+cudart-sys = { git = "https://github.com/whs-dot-hk/era-cuda.git", branch = "test", package = "cudart-sys" }
+[patch."https://github.com/matter-labs/era-boojum-cuda"]
+boojum-cuda = { git = "https://github.com/whs-dot-hk/era-boojum-cuda", branch = "test" }
