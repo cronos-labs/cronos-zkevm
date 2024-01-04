@@ -54,6 +54,13 @@
         // {
         });
 
+      compressor = craneLib.buildPackage (commonArgs
+        // {
+          inherit cargoArtifacts;
+
+          cargoExtraArgs = "--bin zksync_proof_fri_compressor";
+        });
+
       prover = craneLib.buildPackage (commonArgs
         // {
           inherit cargoArtifacts;
@@ -61,6 +68,7 @@
           cargoExtraArgs = "--bin zksync_prover_fri";
         });
     in {
+      packages.compressor = compressor;
       packages.prover = prover;
     });
 }
