@@ -67,8 +67,17 @@
 
           cargoExtraArgs = "--bin zksync_prover_fri";
         });
+
+      witness-generator = craneLib.buildPackage (commonArgs
+        // {
+          inherit cargoArtifacts;
+
+          cargoExtraArgs = "--bin zksync_witness_generator";
+        });
+
     in {
       packages.compressor = compressor;
       packages.prover = prover;
+      packages.witness-generator = witness-generator;
     });
 }
