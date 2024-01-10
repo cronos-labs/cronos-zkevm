@@ -615,16 +615,16 @@ dependencies = [
 [[package]]
 name = "boojum"
 version = "0.1.0"
-source = "git+https://github.com/matter-labs/era-boojum?branch=main#84754b066959c8fdfb77edf730fc13ed87404907"
+source = "git+https://github.com/ivanslwong-crypto-com/era-boojum?branch=cronos-zkevm-18-4-0#50857cb38df0d8c740248cde832256d02cd3c60a"
 dependencies = [
  "arrayvec 0.7.4",
  "bincode",
  "blake2 0.10.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "const_format",
- "convert_case 0.6.0",
- "crossbeam 0.8.2",
+ "convert_case 0.4.0",
+ "crossbeam 0.7.3",
  "crypto-bigint 0.5.4",
- "cs_derive 0.1.0 (git+https://github.com/matter-labs/era-boojum?branch=main)",
+ "cs_derive 0.1.0 (git+https://github.com/ivanslwong-crypto-com/era-boojum?branch=cronos-zkevm-18-4-0)",
  "derivative",
  "ethereum-types 0.14.1",
  "firestorm",
@@ -1287,7 +1287,18 @@ dependencies = [
 [[package]]
 name = "cs_derive"
 version = "0.1.0"
-source = "git+https://github.com/matter-labs/era-boojum?branch=main#84754b066959c8fdfb77edf730fc13ed87404907"
+source = "git+https://github.com/ivanslwong-crypto-com/era-boojum?branch=cronos-zkevm-18-4-0#50857cb38df0d8c740248cde832256d02cd3c60a"
+dependencies = [
+ "proc-macro-error",
+ "proc-macro2 1.0.69",
+ "quote 1.0.33",
+ "syn 1.0.109",
+]
+
+[[package]]
+name = "cs_derive"
+version = "0.1.0"
+source = "git+https://github.com/matter-labs/era-boojum?branch=main#93b5e0f0dbff0a9b606d9025e207c8405c141bd9"
 dependencies = [
  "proc-macro-error",
  "proc-macro2 1.0.69",
@@ -2240,7 +2251,7 @@ version = "0.1.0"
 source = "git+https://github.com/matter-labs/era-heavy-ops-service.git?branch=v1.3.3#ac6a3af6415dc12c9ae2932fa5ad906939023d82"
 dependencies = [
  "bindgen 0.59.2",
- "crossbeam 0.8.2",
+ "crossbeam 0.7.3",
  "derivative",
  "futures 0.3.29",
  "futures-locks",
@@ -2254,7 +2265,7 @@ source = "git+https://github.com/matter-labs/era-heavy-ops-service.git?branch=v1
 dependencies = [
  "bit-vec",
  "cfg-if 1.0.0",
- "crossbeam 0.8.2",
+ "crossbeam 0.7.3",
  "franklin-crypto 0.0.5 (git+https://github.com/matter-labs/franklin-crypto?branch=dev)",
  "gpu-ffi",
  "itertools 0.11.0",
