@@ -1,40 +1,85 @@
 {
-    description = "zkSync development shell";
-    inputs = {
-        stable.url = "github:NixOS/nixpkgs/nixos-22.11";
-    };
-    outputs = {self, stable}: {
-        packages.x86_64-linux.default =
-        with import stable { system = "x86_64-linux"; };
-        pkgs.mkShell {
-            name = "zkSync";
-            src = ./.;
-            buildInputs = [
-                docker-compose
-                nodejs
-                yarn
-                axel
-                libclang
-                openssl
-                pkg-config
-                postgresql
-                python3
-                solc
-            ];
+  inputs.crane.url = "github:ipetkov/crane";
+  inputs.fenix.url = "github:nix-community/fenix";
+  inputs.flake-utils.url = "github:numtide/flake-utils";
+  inputs.nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
 
-            # for RocksDB and other Rust bindgen libraries
-            LIBCLANG_PATH = lib.makeLibraryPath [ libclang.lib ];
-            BINDGEN_EXTRA_CLANG_ARGS = ''-I"${libclang.lib}/lib/clang/${libclang.version}/include"'';
+  outputs = {
+    crane,
+    fenix,
+    flake-utils,
+    nixpkgs,
+    ...
+  }:
+    flake-utils.lib.eachDefaultSystem (system: let
+      pkgs = import nixpkgs {
+        inherit system;
+        config.allowUnfree = true;
+      };
 
-            shellHook = ''
-                export ZKSYNC_HOME=$PWD
-                export PATH=$ZKSYNC_HOME/bin:$PATH
-            '';
+      inherit (pkgs.lib) cleanSourceWith;
 
-            # hardhat solc requires ld-linux
-            # Nixos has to fake it with nix-ld
-            NIX_LD_LIBRARY_PATH = lib.makeLibraryPath [];
-            NIX_LD = builtins.readFile "${stdenv.cc}/nix-support/dynamic-linker";
+      toolchain = with fenix.packages.${system};
+        combine [
+          default.rustc
+          default.cargo
+        ];
+      craneLib = (crane.mkLib pkgs).overrideToolchain toolchain;
+
+      src = cleanSourceWith {
+        src = ./.;
+        filter = _: _: true;
+      };
+
+      commonArgs = with pkgs; {
+        inherit src;
+
+        strictDeps = true;
+
+        cargoLock = ./prover/Cargo.lock;
+        cargoToml = ./prover/Cargo.toml;
+        postUnpack = ''
+          cd $sourceRoot/prover
+          sourceRoot="."
+        '';
+
+        buildInputs = [
+          openssl
+          rocksdb
+          cudaPackages_12.cudatoolkit
+        ];
+        nativeBuildInputs = [pkg-config cmake];
+
+        BINDGEN_EXTRA_CLANG_ARGS = ''-I"${libclang.lib}/lib/clang/16/include"'';
+        LIBCLANG_PATH = lib.makeLibraryPath [libclang.lib];
+
+        CUDAARCHS = "all";
+        CUDA_PATH = cudaPackages_12.cudatoolkit;
+        CUDA_VERSION = "12.0.1";
+      };
+
+      cargoArtifacts = craneLib.buildDepsOnly (commonArgs
+        // {
+        });
+
+      prover = craneLib.buildPackage (commonArgs
+        // {
+          inherit cargoArtifacts;
+
+          cargoExtraArgs = "--features gpu --bin zksync_prover_fri";
+        });
+    in {
+      packages.prover = prover;
+      devShell = with pkgs;
+        mkShell {
+          nativeBuildInputs = [fenix.packages.${system}.default.toolchain cmake pkg-config openssl rocksdb cudaPackages_12.cudatoolkit];
+
+          BINDGEN_EXTRA_CLANG_ARGS = ''-I"${libclang.lib}/lib/clang/16/include"'';
+          LIBCLANG_PATH = lib.makeLibraryPath [libclang.lib];
+
+          CUDAARCHS = "all";
+          CUDA_PATH = cudaPackages_12.cudatoolkit;
+          CUDA_VERSION = "12.0.1";
         };
-    };
+    });
 }
