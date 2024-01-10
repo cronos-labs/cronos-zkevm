@@ -442,29 +442,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "bindgen"
-version = "0.69.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9ffcebc3849946a7170a05992aac39da343a90676ab392c51a4280981d6379c2"
-dependencies = [
- "bitflags 2.4.1",
- "cexpr",
- "clang-sys",
- "lazy_static",
- "lazycell",
- "log",
- "peeking_take_while",
- "prettyplease",
- "proc-macro2 1.0.69",
- "quote 1.0.33",
- "regex",
- "rustc-hash",
- "shlex",
- "syn 2.0.39",
- "which",
-]
-
-[[package]]
 name = "bit-set"
 version = "0.5.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -670,7 +647,7 @@ dependencies = [
 [[package]]
 name = "boojum-cuda"
 version = "0.1.0"
-source = "git+https://github.com/matter-labs/era-boojum-cuda?branch=main#6731d9a8d0c439a4fa3cde14b494c9eca642bb2e"
+source = "git+https://github.com/ivanslwong-crypto-com/era-boojum-cuda.git?branch=cronos-zkevm-18-4-0#4784d172d5e32191eaa56cc22a2bdba929da149d"
 dependencies = [
  "boojum",
  "cmake",
@@ -1352,19 +1329,20 @@ dependencies = [
 [[package]]
 name = "cudart"
 version = "0.1.0"
-source = "git+https://github.com/matter-labs/era-cuda?branch=main#492f2afad93ad156ac0cfb69e6efbfc03a7a2652"
+source = "git+https://github.com/matter-labs/era-cuda?branch=main#59a4e62e5264d01e84f4ac9d85541bc3e661e9f0"
 dependencies = [
  "bitflags 2.4.1",
  "criterion",
  "cudart-sys",
+ "paste",
 ]
 
 [[package]]
 name = "cudart-sys"
 version = "0.1.0"
-source = "git+https://github.com/matter-labs/era-cuda?branch=main#492f2afad93ad156ac0cfb69e6efbfc03a7a2652"
+source = "git+https://github.com/ivanslwong-crypto-com/era-cuda.git?branch=cronos-zkevm-18-4-0#c9ac971c546de8b394fb11cf20f02b500455f1d1"
 dependencies = [
- "bindgen 0.69.1",
+ "bindgen 0.59.2",
  "serde_json",
 ]
 

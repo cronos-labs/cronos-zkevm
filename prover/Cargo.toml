@@ -22,3 +22,7 @@ resolver = "2"
 [profile.perf]
 inherits = "release"
 debug = true
+[patch."https://github.com/matter-labs/era-cuda.git"]
+cudart-sys = { git = "https://github.com/ivanslwong-crypto-com/era-cuda.git", branch = "cronos-zkevm-18-4-0", package = "cudart-sys" }
+[patch."https://github.com/matter-labs/era-boojum-cuda"]
+boojum-cuda = { git = "https://github.com/ivanslwong-crypto-com/era-boojum-cuda.git", branch = "cronos-zkevm-18-4-0" }
