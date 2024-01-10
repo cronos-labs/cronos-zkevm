@@ -431,6 +431,7 @@ dependencies = [
  "clang-sys",
  "lazy_static",
  "lazycell",
+ "log",
  "peeking_take_while",
  "prettyplease",
  "proc-macro2 1.0.69",
@@ -439,6 +440,7 @@ dependencies = [
  "rustc-hash",
  "shlex",
  "syn 2.0.39",
+ "which",
 ]
 
 [[package]]
@@ -1351,9 +1353,9 @@ dependencies = [
 [[package]]
 name = "cudart-sys"
 version = "0.1.0"
-source = "git+https://github.com/ivanslwong-crypto-com/era-cuda.git?branch=cronos-zkevm-18-4-0#c9ac971c546de8b394fb11cf20f02b500455f1d1"
+source = "git+https://github.com/ivanslwong-crypto-com/era-cuda.git?branch=cronos-zkevm-18-4-0#18855095f720bc1dd0dd72ac44b56f01323c3000"
 dependencies = [
- "bindgen 0.59.2",
+ "bindgen 0.65.1",
  "serde_json",
 ]
 
