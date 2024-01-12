@@ -53,8 +53,8 @@
         BINDGEN_EXTRA_CLANG_ARGS = ''-I"${libclang.lib}/lib/clang/16/include"'';
         LIBCLANG_PATH = lib.makeLibraryPath [libclang.lib];
 
-        CUDAARCHS = "80";
-        CUDA_PATH = cudaPackages_12.cudatoolkit;
+        CUDAARCHS = "75";
+        CUDA_PATH = cudaPackages_12_2.cudatoolkit;
         CUDA_VERSION = "12.2";
       };
 
@@ -70,16 +70,5 @@
         });
     in {
       packages.prover = prover;
-      devShell = with pkgs;
-        mkShell {
-          nativeBuildInputs = [fenix.packages.${system}.default.toolchain cmake pkg-config openssl rocksdb cudaPackages_12.cudatoolkit];
-
-          BINDGEN_EXTRA_CLANG_ARGS = ''-I"${libclang.lib}/lib/clang/16/include"'';
-          LIBCLANG_PATH = lib.makeLibraryPath [libclang.lib];
-
-          CUDAARCHS = "all";
-          CUDA_PATH = cudaPackages_12.cudatoolkit;
-          CUDA_VERSION = "12.0.1";
-        };
     });
 }
