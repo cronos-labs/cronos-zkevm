@@ -987,16 +987,16 @@ dependencies = [
 [[package]]
 name = "boojum"
 version = "0.1.0"
-source = "git+https://github.com/matter-labs/era-boojum.git?branch=main#84754b066959c8fdfb77edf730fc13ed87404907"
+source = "git+https://github.com/whs-dot-hk/era-boojum?branch=test#a530c19236e0c0b45c5c3268512501a549831a17"
 dependencies = [
  "arrayvec 0.7.4",
  "bincode",
  "blake2 0.10.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "const_format",
- "convert_case 0.6.0",
- "crossbeam 0.8.2",
+ "convert_case 0.4.0",
+ "crossbeam 0.7.3",
  "crypto-bigint 0.5.3",
- "cs_derive 0.1.0 (git+https://github.com/matter-labs/era-boojum.git?branch=main)",
+ "cs_derive 0.1.0 (git+https://github.com/whs-dot-hk/era-boojum?branch=test)",
  "derivative",
  "ethereum-types 0.14.1",
  "firestorm",
@@ -1814,7 +1814,18 @@ dependencies = [
 [[package]]
 name = "cs_derive"
 version = "0.1.0"
-source = "git+https://github.com/matter-labs/era-boojum.git?branch=main#84754b066959c8fdfb77edf730fc13ed87404907"
+source = "git+https://github.com/matter-labs/era-boojum.git?branch=main#93b5e0f0dbff0a9b606d9025e207c8405c141bd9"
+dependencies = [
+ "proc-macro-error",
+ "proc-macro2 1.0.69",
+ "quote 1.0.33",
+ "syn 1.0.109",
+]
+
+[[package]]
+name = "cs_derive"
+version = "0.1.0"
+source = "git+https://github.com/whs-dot-hk/era-boojum?branch=test#a530c19236e0c0b45c5c3268512501a549831a17"
 dependencies = [
  "proc-macro-error",
  "proc-macro2 1.0.69",
@@ -4700,7 +4711,7 @@ dependencies = [
 [[package]]
 name = "pairing_ce"
 version = "0.28.5"
-source = "git+https://github.com/matter-labs/pairing.git#d06c2a112913b0abfb75996cc29a6b6075717e99"
+source = "git+https://github.com/matter-labs/pairing.git#f55393fd366596eac792d78525d26e9c4d6ed1ca"
 dependencies = [
  "byteorder",
  "cfg-if 1.0.0",

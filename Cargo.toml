@@ -57,3 +57,5 @@ exclude = []
 [profile.perf]
 inherits = "release"
 debug = true
+[patch."https://github.com/matter-labs/era-boojum"]
+boojum = { git = 'https://github.com/whs-dot-hk/era-boojum', branch = 'test' }

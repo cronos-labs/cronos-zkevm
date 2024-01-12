@@ -33,13 +33,6 @@
 
         strictDeps = true;
 
-        cargoLock = ./prover/Cargo.lock;
-        cargoToml = ./prover/Cargo.toml;
-        postUnpack = ''
-          cd $sourceRoot/prover
-          sourceRoot="."
-        '';
-
         buildInputs = [
           openssl
           rocksdb
@@ -50,42 +43,66 @@
         LIBCLANG_PATH = lib.makeLibraryPath [libclang.lib];
       };
 
+      prover = let
+        commonArgs =
+          commonArgs
+          // {
+            cargoLock = ./prover/Cargo.lock;
+            cargoToml = ./prover/Cargo.toml;
+            postUnpack = ''
+              cd $sourceRoot/prover
+              sourceRoot="."
+            '';
+          };
+        cargoArtifacts = craneLib.buildDepsOnly (commonArgs
+          // {
+          });
+      in {
+        compressor = craneLib.buildPackage (commonArgs
+          // {
+            inherit cargoArtifacts;
+
+            cargoExtraArgs = "--bin zksync_proof_fri_compressor";
+          });
+
+        prover = craneLib.buildPackage (commonArgs
+          // {
+            inherit cargoArtifacts;
+
+            cargoExtraArgs = "--bin zksync_prover_fri";
+          });
+
+        witness-generator = craneLib.buildPackage (commonArgs
+          // {
+            inherit cargoArtifacts;
+
+            cargoExtraArgs = "--bin zksync_witness_generator";
+          });
+
+        witness-vector-generator = craneLib.buildPackage (commonArgs
+          // {
+            inherit cargoArtifacts;
+
+            cargoExtraArgs = "--bin zksync_witness_vector_generator";
+          });
+      };
+
       cargoArtifacts = craneLib.buildDepsOnly (commonArgs
         // {
         });
 
-      compressor = craneLib.buildPackage (commonArgs
+      contract-verifier = craneLib.buildPackage (commonArgs
         // {
           inherit cargoArtifacts;
 
-          cargoExtraArgs = "--bin zksync_proof_fri_compressor";
+          cargoExtraArgs = "--bin zksync_contract_verifier";
         });
-
-      prover = craneLib.buildPackage (commonArgs
-        // {
-          inherit cargoArtifacts;
-
-          cargoExtraArgs = "--bin zksync_prover_fri";
-        });
-
-      witness-generator = craneLib.buildPackage (commonArgs
-        // {
-          inherit cargoArtifacts;
-
-          cargoExtraArgs = "--bin zksync_witness_generator";
-        });
-      
-      witness-vector-generator = craneLib.buildPackage (commonArgs
-        // {
-          inherit cargoArtifacts;
-
-          cargoExtraArgs = "--bin zksync_witness_vector_generator";
-        });
-
     in {
-      packages.compressor = compressor;
-      packages.prover = prover;
-      packages.witness-generator = witness-generator;
-      packages.witness-vector-generator = witness-vector-generator;
+      packages.compressor = prover.compressor;
+      packages.prover = prover.prover;
+      packages.witness-generator = prover.witness-generator;
+      packages.witness-vector-generator = prover.witness-vector-generator;
+
+      packages.contract-verifier = contract-verifier;
     });
 }
