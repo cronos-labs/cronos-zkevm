@@ -46,16 +46,16 @@
         buildInputs = [
           openssl
           rocksdb
-          cudaPackages_12.cudatoolkit
+          cudaPackages_12_2.cudatoolkit
         ];
         nativeBuildInputs = [pkg-config cmake];
 
         BINDGEN_EXTRA_CLANG_ARGS = ''-I"${libclang.lib}/lib/clang/16/include"'';
         LIBCLANG_PATH = lib.makeLibraryPath [libclang.lib];
 
-        CUDAARCHS = "all";
+        CUDAARCHS = "80";
         CUDA_PATH = cudaPackages_12.cudatoolkit;
-        CUDA_VERSION = "12.0.1";
+        CUDA_VERSION = "12.2";
       };
 
       cargoArtifacts = craneLib.buildDepsOnly (commonArgs
