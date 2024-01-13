@@ -48,6 +48,7 @@
           cmake
           makeWrapper
           pkg-config
+          cudaPackages_12_2.autoAddOpenGLRunpathHook
         ];
         buildInputs = [
           openssl
@@ -74,11 +75,11 @@
 
           cargoExtraArgs = "--features gpu --bin zksync_prover_fri";
 
-          postFixup = ''
-            #addOpenGLRunpath $out/bin/zksync_prover_fri
-            wrapProgram $out/bin/zksync_prover_fri \
-              --prefix LD_LIBRARY_PATH : "/run/opengl-driver/lib"
-          '';
+          #postFixup = ''
+          #  addOpenGLRunpath $out/bin/zksync_prover_fri
+          #  wrapProgram $out/bin/zksync_prover_fri \
+          #    --prefix LD_LIBRARY_PATH : "/run/opengl-driver/lib"
+          #'';
         });
     in {
       packages.prover = prover;
