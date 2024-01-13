@@ -43,12 +43,16 @@
           sourceRoot="."
         '';
 
+        nativeBuildInputs = [
+          addOpenGLRunpath
+          cmake
+          pkg-config
+        ];
         buildInputs = [
           openssl
           rocksdb
           cudaPackages_12_2.cudatoolkit
         ];
-        nativeBuildInputs = [pkg-config cmake];
 
         BINDGEN_EXTRA_CLANG_ARGS = ''-I"${libclang.lib}/lib/clang/16/include"'';
         LIBCLANG_PATH = lib.makeLibraryPath [libclang.lib];
