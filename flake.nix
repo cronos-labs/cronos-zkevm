@@ -67,6 +67,10 @@
           inherit cargoArtifacts;
 
           cargoExtraArgs = "--features gpu --bin zksync_prover_fri";
+
+          postFixup = ''
+            addOpenGLRunpath $out/bin/zksync_prover_fri
+          '';
         });
     in {
       packages.prover = prover;
