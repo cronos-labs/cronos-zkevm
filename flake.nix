@@ -44,23 +44,21 @@
         '';
 
         nativeBuildInputs = [
-          addOpenGLRunpath
           cmake
-          makeWrapper
-          pkg-config
           cudaPackages_12_2.autoAddOpenGLRunpathHook
+          cudaPackages_12_2.cuda_nvcc
+          pkg-config
         ];
         buildInputs = [
           openssl
           rocksdb
-          cudaPackages_12_2.cudatoolkit
+          cudaPackages_12_2.cuda_cudart
         ];
 
         BINDGEN_EXTRA_CLANG_ARGS = ''-I"${libclang.lib}/lib/clang/16/include"'';
-        #EXTRA_LDFLAGS = "-L/run/opengl-driver/lib";
         LIBCLANG_PATH = lib.makeLibraryPath [libclang.lib];
 
-        #CUDAARCHS = "75";
+        CUDAARCHS = "75";
         CUDA_PATH = cudaPackages_12_2.cudatoolkit;
         CUDA_VERSION = "12.2";
       };
@@ -74,12 +72,6 @@
           inherit cargoArtifacts;
 
           cargoExtraArgs = "--features gpu --bin zksync_prover_fri";
-
-          #postFixup = ''
-          #  addOpenGLRunpath $out/bin/zksync_prover_fri
-          #  wrapProgram $out/bin/zksync_prover_fri \
-          #    --prefix LD_LIBRARY_PATH : "/run/opengl-driver/lib"
-          #'';
         });
     in {
       packages.prover = prover;
