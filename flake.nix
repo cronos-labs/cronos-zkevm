@@ -52,7 +52,7 @@
         buildInputs = [
           openssl
           rocksdb
-          cudaPackages_12_2.cuda_cudart
+          cudaPackages_12_2.cudatoolkit
         ];
 
         BINDGEN_EXTRA_CLANG_ARGS = ''-I"${libclang.lib}/lib/clang/16/include"'';
