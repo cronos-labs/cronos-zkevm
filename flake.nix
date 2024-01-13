@@ -46,6 +46,7 @@
         nativeBuildInputs = [
           addOpenGLRunpath
           cmake
+          makeWrapper
           pkg-config
         ];
         buildInputs = [
@@ -74,6 +75,8 @@
 
           postFixup = ''
             addOpenGLRunpath $out/bin/zksync_prover_fri
+            wrapProgram $out/bin/zksync_prover_fri \
+              --prefix LD_LIBRARY_PATH : "/run/opengl-driver/lib"
           '';
         });
     in {
