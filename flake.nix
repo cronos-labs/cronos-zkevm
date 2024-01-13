@@ -56,6 +56,7 @@
         ];
 
         BINDGEN_EXTRA_CLANG_ARGS = ''-I"${libclang.lib}/lib/clang/16/include"'';
+        EXTRA_LDFLAGS = "-L/run/opengl-driver/lib";
         LIBCLANG_PATH = lib.makeLibraryPath [libclang.lib];
 
         CUDAARCHS = "75";
