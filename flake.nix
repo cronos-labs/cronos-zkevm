@@ -65,6 +65,7 @@
 
       cargoArtifacts = craneLib.buildDepsOnly (commonArgs
         // {
+          cargoExtraArgs = "--features gpu --bin crane-dummy-zksync_prover_fri";
         });
 
       prover = craneLib.buildPackage (commonArgs
