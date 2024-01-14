@@ -644,7 +644,7 @@ dependencies = [
  "bincode",
  "blake2 0.10.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "const_format",
- "convert_case 0.4.0",
+ "convert_case 0.6.0",
  "crossbeam 0.8.2",
  "crypto-bigint 0.5.4",
  "cs_derive 0.1.0 (git+https://github.com/whs-dot-hk/era-boojum?branch=test)",
@@ -1310,7 +1310,7 @@ dependencies = [
 [[package]]
 name = "cs_derive"
 version = "0.1.0"
-source = "git+https://github.com/matter-labs/era-boojum?branch=main#ddfefee5ddb0c29a3b008c4304b8fefe084e2e71"
+source = "git+https://github.com/matter-labs/era-boojum?branch=main#93b5e0f0dbff0a9b606d9025e207c8405c141bd9"
 dependencies = [
  "proc-macro-error",
  "proc-macro2 1.0.69",
@@ -5396,7 +5396,26 @@ dependencies = [
 [[package]]
 name = "shivini"
 version = "0.1.0"
-source = "git+https://github.com/matter-labs/era-shivini.git?branch=main#2ad8c0430edcbf372015351792ba833b0d7af367"
+source = "git+https://github.com/matter-labs/era-shivini.git?branch=main#d82c2bbfa02c20e9daf4abcd3f906b53f5a494ee"
+dependencies = [
+ "bincode",
+ "blake2 0.10.6 (registry+https://github.com/rust-lang/crates.io-index)",
+ "boojum",
+ "boojum-cuda",
+ "circuit_definitions",
+ "cudart",
+ "derivative",
+ "hex",
+ "rand 0.8.5",
+ "serde",
+ "sha2 0.10.8",
+ "smallvec",
+]
+
+[[package]]
+name = "shivini"
+version = "0.1.0"
+source = "git+https://github.com/whs-dot-hk/era-shivini.git?branch=test#900f13e818bd075795856606ececb009f66b3b9b"
 dependencies = [
  "bincode",
  "blake2 0.10.6 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -6467,7 +6486,7 @@ dependencies = [
  "serde",
  "serde_derive",
  "serde_json",
- "shivini",
+ "shivini 0.1.0 (git+https://github.com/matter-labs/era-shivini.git?branch=main)",
  "structopt",
  "tracing",
  "vlog",
@@ -7508,7 +7527,7 @@ dependencies = [
  "metrics",
  "prometheus_exporter",
  "serde",
- "shivini",
+ "shivini 0.1.0 (git+https://github.com/whs-dot-hk/era-shivini.git?branch=test)",
  "tokio",
  "tracing",
  "vk_setup_data_generator_server_fri",
