@@ -5415,7 +5415,7 @@ dependencies = [
 [[package]]
 name = "shivini"
 version = "0.1.0"
-source = "git+https://github.com/whs-dot-hk/era-shivini.git?branch=test#3900185d88bada1c7d618352131bcc276eb812bc"
+source = "git+https://github.com/whs-dot-hk/era-shivini.git?branch=test#8bf5e685b9e9968d871cd9dbe877dcbfd2deb4b3"
 dependencies = [
  "bincode",
  "blake2 0.10.6 (registry+https://github.com/rust-lang/crates.io-index)",
