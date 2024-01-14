@@ -28,3 +28,7 @@ boojum = { git = 'https://github.com/whs-dot-hk/era-boojum', branch = 'test' }
 cudart-sys = { git = "https://github.com/whs-dot-hk/era-cuda.git", branch = "test", package = "cudart-sys" }
 [patch."https://github.com/matter-labs/era-boojum-cuda"]
 boojum-cuda = { git = "https://github.com/whs-dot-hk/era-boojum-cuda", branch = "test" }
+[patch."https://github.com/matter-labs/era-heavy-ops-service.git"]
+gpu-ffi = { git = "https://github.com/whs-dot-hk/era-heavy-ops-service.git", branch = "test" }
+api = { git = "https://github.com/whs-dot-hk/era-heavy-ops-service.git", branch = "test" }
+prover-service = { git = "https://github.com/whs-dot-hk/era-heavy-ops-service.git", branch = "test" }
