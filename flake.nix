@@ -21,10 +21,42 @@
 
       toolchain = with fenix.packages.${system};
         combine [
-          default.rustc
           default.cargo
+          default.rustc
+          default.rustfmt
         ];
       craneLib = (crane.mkLib pkgs).overrideToolchain toolchain;
+
+      bellman-cuda = with pkgs;
+        stdenv.mkDerivation {
+          pname = "bellman-cuda";
+          version = "1.0.0";
+
+          src = fetchFromGitHub {
+            owner = "matter-labs";
+            repo = "era-bellman-cuda";
+            rev = "b52127574e67f4c7938890eab0670ae75f49c22f";
+            hash = "sha256-fACNERGEWpVzt2lcderix7Ybh80kvxqFBtbfDER7Erg=";
+          };
+
+          nativeBuildInputs = [
+            cmake
+            cudaPackages_12_2.autoAddOpenGLRunpathHook
+            cudaPackages_12_2.cuda_nvcc
+            pkg-config
+          ];
+
+          buildInputs = [
+            cudaPackages_12_2.cudatoolkit
+          ];
+
+          CUDAToolkit_ROOT = cudaPackages_12_2.cudatoolkit;
+
+          postInstall = ''
+            mkdir -p $out/src
+            cp $src/src/bellman-cuda.h $out/src
+          '';
+        };
 
       src = cleanSourceWith {
         src = ./.;
@@ -61,6 +93,8 @@
         CUDAARCHS = "75";
         CUDA_PATH = cudaPackages_12_2.cudatoolkit;
         CUDA_VERSION = "12.2";
+
+        BELLMAN_CUDA_DIR = bellman-cuda;
       };
 
       cargoArtifacts = craneLib.buildDepsOnly (commonArgs
@@ -76,5 +110,12 @@
         });
     in {
       packages.prover = prover;
+      devShell = with pkgs;
+        mkShell {
+          nativeBuildInputs = [fenix.packages.${system}.default.toolchain pkg-config openssl];
+
+          BINDGEN_EXTRA_CLANG_ARGS = ''-I"${libclang.lib}/lib/clang/16/include"'';
+          LIBCLANG_PATH = lib.makeLibraryPath [libclang.lib];
+        };
     });
 }
