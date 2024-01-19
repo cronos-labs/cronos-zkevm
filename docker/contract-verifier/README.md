@@ -3,7 +3,7 @@
 ## Building the contract verifier docker image
 
 - execute `zk` in the project root directory.
-- simply run `zk docker build contract_verifier` in the project root directory.
+- simply run `zk docker build contract-verifier` in the project root directory.
 
 ## Testing the contract verifier docker image
 
