@@ -19,4 +19,15 @@ services:
         target: /var/lib/postgresql/data
     environment:
       - POSTGRES_HOST_AUTH_METHOD=trust
-
+  contract-verifier:
+    image: "matterlabs/contract-verifier:latest"
+    ports:
+      - "3070:3070"
+    volumes:
+      - type: bind
+        source: ./volumes/contract-verifier
+        target: /var/lib/contract-verifier/data
+    environment:
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    env_file:
+      - ./etc/env/docker.env
