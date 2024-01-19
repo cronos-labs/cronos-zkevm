@@ -14,6 +14,7 @@
     flake-utils.lib.eachDefaultSystem (system: let
       pkgs = nixpkgs.legacyPackages.${system};
 
+      inherit (pkgs) stdenv;
       inherit (pkgs.lib) cleanSourceWith;
 
       toolchain = with fenix.packages.${system};
@@ -97,6 +98,18 @@
 
           cargoExtraArgs = "--bin zksync_contract_verifier";
         });
+
+      prover-vk-setup-data-generator-server-fri-data = stdenv.mkDerivation {
+        pname = "prover-vk-setup-data-generator-server-fri-data";
+        version = "1.0.0";
+        src = ./prover/vk_setup_data_generator_server_fri/data/.;
+        dontBuild = true;
+        dontUnpack = true;
+        installPhase = ''
+          mkdir -p $out/data
+          cp $src/* $out/data
+        '';
+      };
     in {
       packages.compressor = prover.compressor;
       packages.prover = prover.prover;
@@ -104,5 +117,7 @@
       packages.witness-vector-generator = prover.witness-vector-generator;
 
       packages.contract-verifier = contract-verifier;
+
+      packages.prover-vk-setup-data-generator-server-fri-data = prover-vk-setup-data-generator-server-fri-data;
     });
 }
