@@ -7,23 +7,19 @@ export async function callFacetDeployer(
     create2Address: string,
     nonce: string,
     executor: boolean,
-    governance: boolean,
-    diamondCut: boolean,
+    admin: boolean,
     getters: boolean,
     mailbox: boolean,
     file: string
 ) {
     const cwd = process.cwd();
-    process.chdir(`${process.env.ZKSYNC_HOME}/contracts/ethereum/`);
+    process.chdir(`${process.env.ZKSYNC_HOME}/contracts/l1-contracts/`);
     let argsString = '';
     if (executor) {
         argsString += ' --executor';
     }
-    if (governance) {
-        argsString += ' --governance';
-    }
-    if (diamondCut) {
-        argsString += ' --diamondCut';
+    if (admin) {
+        argsString += ' --admin';
     }
     if (getters) {
         argsString += ' --getters';

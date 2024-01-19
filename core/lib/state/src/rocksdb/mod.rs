@@ -19,18 +19,18 @@
 //! | Contracts    | address (20 bytes)              | `Vec<u8>`                       | Contract contents                         |
 //! | Factory deps | hash (32 bytes)                 | `Vec<u8>`                       | Bytecodes for new contracts that a certain contract may deploy. |
 
-use itertools::{Either, Itertools};
 use std::{collections::HashMap, convert::TryInto, mem, path::Path, time::Instant};
 
+use itertools::{Either, Itertools};
 use zksync_dal::StorageProcessor;
 use zksync_storage::{db::NamedColumnFamily, RocksDB};
 use zksync_types::{L1BatchNumber, StorageKey, StorageValue, H256, U256};
 use zksync_utils::{h256_to_u256, u256_to_h256};
 
-mod metrics;
-
 use self::metrics::METRICS;
 use crate::{InMemoryStorage, ReadStorage};
+
+mod metrics;
 
 fn serialize_block_number(block_number: u32) -> [u8; 4] {
     block_number.to_le_bytes()
@@ -185,7 +185,11 @@ impl RocksdbStorage {
             "Secondary storage for L1 batch #{latest_l1_batch_number} initialized, size is {estimated_size}"
         );
 
-        self.save_missing_enum_indices(conn).await;
+        assert!(self.enum_index_migration_chunk_size > 0);
+        // Enum indices must be at the storage. Run migration till the end.
+        while self.enum_migration_start_from().is_some() {
+            self.save_missing_enum_indices(conn).await;
+        }
     }
 
     async fn apply_storage_logs(
@@ -502,13 +506,13 @@ impl ReadStorage for RocksdbStorage {
 #[cfg(test)]
 mod tests {
     use tempfile::TempDir;
+    use zksync_dal::ConnectionPool;
+    use zksync_types::{MiniblockNumber, StorageLog};
 
     use super::*;
     use crate::test_utils::{
         create_l1_batch, create_miniblock, gen_storage_logs, prepare_postgres,
     };
-    use zksync_dal::ConnectionPool;
-    use zksync_types::{MiniblockNumber, StorageLog};
 
     #[tokio::test]
     async fn rocksdb_storage_basics() {

@@ -1,8 +1,9 @@
 use zksync_state::WriteStorage;
 
-use crate::vm_virtual_blocks::old_vm::history_recorder::HistoryMode;
-use crate::vm_virtual_blocks::tracers::DefaultExecutionTracer;
-use crate::vm_virtual_blocks::vm::Vm;
+use crate::{
+    vm_virtual_blocks::{tracers::DefaultExecutionTracer, vm::Vm},
+    HistoryMode,
+};
 
 impl<S: WriteStorage, H: HistoryMode> Vm<S, H> {
     /// Returns the amount of gas remaining to the VM.
@@ -19,7 +20,7 @@ impl<S: WriteStorage, H: HistoryMode> Vm<S, H> {
 
     pub(crate) fn calculate_computational_gas_used(
         &self,
-        tracer: &DefaultExecutionTracer<S, H>,
+        tracer: &DefaultExecutionTracer<S, H::VmVirtualBlocksMode>,
         gas_remaining_before: u32,
         spent_pubdata_counter_before: u32,
     ) -> u32 {

@@ -1,11 +1,12 @@
 use anyhow::Context as _;
 use prometheus_exporter::PrometheusExporterConfig;
 use structopt::StructOpt;
-use tokio::{sync::oneshot, sync::watch};
-
-use zksync_config::configs::{AlertsConfig, CircuitSynthesizerConfig, ProverGroupConfig};
-use zksync_dal::connection::DbVariant;
+use tokio::sync::{oneshot, watch};
+use zksync_config::configs::{
+    AlertsConfig, CircuitSynthesizerConfig, ObjectStoreConfig, PostgresConfig, ProverGroupConfig,
+};
 use zksync_dal::ConnectionPool;
+use zksync_env_config::FromEnv;
 use zksync_object_store::ObjectStoreFactory;
 use zksync_queued_job_processor::JobProcessor;
 use zksync_utils::wait_for_tasks::wait_for_tasks;
@@ -14,6 +15,7 @@ use zksync_verification_key_server::get_cached_commitments;
 use crate::circuit_synthesizer::CircuitSynthesizer;
 
 mod circuit_synthesizer;
+mod metrics;
 
 #[derive(Debug, StructOpt)]
 #[structopt(name = "TODO", about = "TODO")]
@@ -44,16 +46,22 @@ async fn main() -> anyhow::Result<()> {
     let opt = Opt::from_args();
     let config: CircuitSynthesizerConfig =
         CircuitSynthesizerConfig::from_env().context("CircuitSynthesizerConfig::from_env()")?;
-    let pool = ConnectionPool::builder(DbVariant::Prover)
-        .build()
-        .await
-        .context("failed to build a connection pool")?;
+    let postgres_config = PostgresConfig::from_env().context("PostgresConfig::from_env()")?;
+    let pool = ConnectionPool::builder(
+        postgres_config.prover_url()?,
+        postgres_config.max_connections()?,
+    )
+    .build()
+    .await
+    .context("failed to build a connection pool")?;
     let vk_commitments = get_cached_commitments();
 
+    let object_store_config =
+        ObjectStoreConfig::from_env().context("ObjectStoreConfig::from_env()")?;
     let circuit_synthesizer = CircuitSynthesizer::new(
         config.clone(),
         ProverGroupConfig::from_env().context("ProverGroupConfig::from_env()")?,
-        &ObjectStoreFactory::from_env().context("ObjectStoreFactory::from_env()")?,
+        &ObjectStoreFactory::new(object_store_config),
         vk_commitments,
         pool,
     )

@@ -1,20 +1,20 @@
 use std::path::PathBuf;
 
+use once_cell::sync::Lazy;
 use zksync_basic_types::{AccountTreeId, Address, U256};
 use zksync_contracts::{read_sys_contract_bytecode, ContractLanguage, SystemContractsRepo};
 use zksync_system_constants::{
-    BOOTLOADER_UTILITIES_ADDRESS, BYTECODE_COMPRESSOR_ADDRESS, COMPLEX_UPGRADER_ADDRESS,
-    EVENT_WRITER_ADDRESS,
+    BOOTLOADER_UTILITIES_ADDRESS, COMPRESSOR_ADDRESS, EVENT_WRITER_ADDRESS,
 };
 
 use crate::{
     block::DeployedContract, ACCOUNT_CODE_STORAGE_ADDRESS, BOOTLOADER_ADDRESS,
-    CONTRACT_DEPLOYER_ADDRESS, ECRECOVER_PRECOMPILE_ADDRESS, IMMUTABLE_SIMULATOR_STORAGE_ADDRESS,
+    COMPLEX_UPGRADER_ADDRESS, CONTRACT_DEPLOYER_ADDRESS, ECRECOVER_PRECOMPILE_ADDRESS,
+    EC_ADD_PRECOMPILE_ADDRESS, EC_MUL_PRECOMPILE_ADDRESS, IMMUTABLE_SIMULATOR_STORAGE_ADDRESS,
     KECCAK256_PRECOMPILE_ADDRESS, KNOWN_CODES_STORAGE_ADDRESS, L1_MESSENGER_ADDRESS,
     L2_ETH_TOKEN_ADDRESS, MSG_VALUE_SIMULATOR_ADDRESS, NONCE_HOLDER_ADDRESS,
     SHA256_PRECOMPILE_ADDRESS, SYSTEM_CONTEXT_ADDRESS,
 };
-use once_cell::sync::Lazy;
 
 // Note, that in the NONCE_HOLDER_ADDRESS's storage the nonces of accounts
 // are stored in the following form:
@@ -24,7 +24,7 @@ use once_cell::sync::Lazy;
 pub const TX_NONCE_INCREMENT: U256 = U256([1, 0, 0, 0]); // 1
 pub const DEPLOYMENT_NONCE_INCREMENT: U256 = U256([0, 0, 1, 0]); // 2^128
 
-static SYSTEM_CONTRACT_LIST: [(&str, &str, Address, ContractLanguage); 18] = [
+static SYSTEM_CONTRACT_LIST: [(&str, &str, Address, ContractLanguage); 20] = [
     (
         "",
         "AccountCodeStorage",
@@ -92,6 +92,18 @@ static SYSTEM_CONTRACT_LIST: [(&str, &str, Address, ContractLanguage); 18] = [
         ContractLanguage::Yul,
     ),
     (
+        "precompiles/",
+        "EcAdd",
+        EC_ADD_PRECOMPILE_ADDRESS,
+        ContractLanguage::Yul,
+    ),
+    (
+        "precompiles/",
+        "EcMul",
+        EC_MUL_PRECOMPILE_ADDRESS,
+        ContractLanguage::Yul,
+    ),
+    (
         "",
         "SystemContext",
         SYSTEM_CONTEXT_ADDRESS,
@@ -109,12 +121,7 @@ static SYSTEM_CONTRACT_LIST: [(&str, &str, Address, ContractLanguage); 18] = [
         BOOTLOADER_UTILITIES_ADDRESS,
         ContractLanguage::Sol,
     ),
-    (
-        "",
-        "BytecodeCompressor",
-        BYTECODE_COMPRESSOR_ADDRESS,
-        ContractLanguage::Sol,
-    ),
+    ("", "Compressor", COMPRESSOR_ADDRESS, ContractLanguage::Sol),
     (
         "",
         "ComplexUpgrader",

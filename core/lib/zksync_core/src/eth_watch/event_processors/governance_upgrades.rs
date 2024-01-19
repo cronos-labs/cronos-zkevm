@@ -1,13 +1,14 @@
-use crate::eth_watch::{
-    client::{Error, EthClient},
-    event_processors::EventProcessor,
-};
-use std::convert::TryFrom;
-use std::time::Instant;
+use std::{convert::TryFrom, time::Instant};
+
 use zksync_dal::StorageProcessor;
 use zksync_types::{
     ethabi::Contract, protocol_version::GovernanceOperation, web3::types::Log, Address,
     ProtocolUpgrade, ProtocolVersionId, H256,
+};
+
+use crate::eth_watch::{
+    client::{Error, EthClient},
+    event_processors::EventProcessor,
 };
 
 /// Listens to operation events coming from the governance contract and saves new protocol upgrade proposals to the database.
@@ -57,8 +58,14 @@ impl<W: EthClient + Sync> EventProcessor<W> for GovernanceUpgradesEventProcessor
                 .into_iter()
                 .filter(|call| call.target == self.diamond_proxy_address)
             {
-                let upgrade = ProtocolUpgrade::try_from(call)
-                    .map_err(|err| Error::LogParse(format!("{:?}", err)))?;
+                // We might not get an upgrade operation here, but something else instead
+                // (e.g. `acceptGovernor` call), so if parsing doesn't work, just skip the call.
+                let Ok(upgrade) = ProtocolUpgrade::try_from(call) else {
+                    tracing::warn!(
+                        "Failed to parse governance operation call as protocol upgrade, skipping"
+                    );
+                    continue;
+                };
                 // Scheduler VK is not present in proposal event. It is hardcoded in verifier contract.
                 let scheduler_vk_hash = if let Some(address) = upgrade.verifier_address {
                     Some(client.scheduler_vk_hash(address).await?)

@@ -1,11 +1,20 @@
-use crate::interface::{TxExecutionMode, VmExecutionMode};
-use crate::vm_latest::constants::BLOCK_GAS_LIMIT;
-use crate::vm_latest::tests::tester::VmTesterBuilder;
-use crate::vm_latest::tests::utils::{read_max_depth_contract, read_test_contract};
-use crate::vm_latest::{CallTracer, HistoryEnabled};
-use once_cell::sync::OnceCell;
 use std::sync::Arc;
+
+use once_cell::sync::OnceCell;
 use zksync_types::{Address, Execute};
+
+use crate::{
+    interface::{TxExecutionMode, VmExecutionMode, VmInterface},
+    tracers::CallTracer,
+    vm_latest::{
+        constants::BLOCK_GAS_LIMIT,
+        tests::{
+            tester::VmTesterBuilder,
+            utils::{read_max_depth_contract, read_test_contract},
+        },
+        HistoryEnabled, ToTracerPointer,
+    },
+};
 
 // This test is ultra slow, so it's ignored by default.
 #[test]
@@ -34,11 +43,9 @@ fn test_max_depth() {
     );
 
     let result = Arc::new(OnceCell::new());
-    let call_tracer = CallTracer::new(result.clone(), HistoryEnabled);
+    let call_tracer = CallTracer::new(result.clone()).into_tracer_pointer();
     vm.vm.push_transaction(tx);
-    let res = vm
-        .vm
-        .inspect(vec![Box::new(call_tracer)], VmExecutionMode::OneTx);
+    let res = vm.vm.inspect(call_tracer.into(), VmExecutionMode::OneTx);
     assert!(result.get().is_some());
     assert!(res.result.is_failed());
 }
@@ -71,11 +78,9 @@ fn test_basic_behavior() {
     );
 
     let result = Arc::new(OnceCell::new());
-    let call_tracer = CallTracer::new(result.clone(), HistoryEnabled);
+    let call_tracer = CallTracer::new(result.clone()).into_tracer_pointer();
     vm.vm.push_transaction(tx);
-    let res = vm
-        .vm
-        .inspect(vec![Box::new(call_tracer)], VmExecutionMode::OneTx);
+    let res = vm.vm.inspect(call_tracer.into(), VmExecutionMode::OneTx);
 
     let call_tracer_result = result.get().unwrap();
 

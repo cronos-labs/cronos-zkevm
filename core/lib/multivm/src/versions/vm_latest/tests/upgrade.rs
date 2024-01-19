@@ -1,26 +1,28 @@
-use zk_evm_1_3_3::aux_structures::Timestamp;
-
-use zksync_types::{
-    ethabi::Contract,
-    Execute, COMPLEX_UPGRADER_ADDRESS, CONTRACT_DEPLOYER_ADDRESS, CONTRACT_FORCE_DEPLOYER_ADDRESS,
-    REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_BYTE,
-    {ethabi::Token, Address, ExecuteTransactionCommon, Transaction, H256, U256},
-    {get_code_key, get_known_code_key, H160},
-};
-
-use zksync_utils::{bytecode::hash_bytecode, bytes_to_be_words, h256_to_u256, u256_to_h256};
-
+use zk_evm_1_4_0::aux_structures::Timestamp;
 use zksync_contracts::{deployer_contract, load_contract, load_sys_contract, read_bytecode};
 use zksync_state::WriteStorage;
 use zksync_test_account::TxType;
-
-use crate::interface::{ExecutionResult, Halt, TxExecutionMode, VmExecutionMode};
-use crate::vm_latest::tests::tester::VmTesterBuilder;
-use crate::vm_latest::tests::utils::verify_required_storage;
-use crate::vm_latest::HistoryEnabled;
-use zksync_types::protocol_version::ProtocolUpgradeTxCommonData;
+use zksync_types::{
+    ethabi::{Contract, Token},
+    get_code_key, get_known_code_key,
+    protocol_version::ProtocolUpgradeTxCommonData,
+    Address, Execute, ExecuteTransactionCommon, Transaction, COMPLEX_UPGRADER_ADDRESS,
+    CONTRACT_DEPLOYER_ADDRESS, CONTRACT_FORCE_DEPLOYER_ADDRESS, H160, H256,
+    REQUIRED_L1_TO_L2_GAS_PER_PUBDATA_BYTE, U256,
+};
+use zksync_utils::{bytecode::hash_bytecode, bytes_to_be_words, h256_to_u256, u256_to_h256};
 
 use super::utils::read_test_contract;
+use crate::{
+    interface::{
+        ExecutionResult, Halt, TxExecutionMode, VmExecutionMode, VmInterface,
+        VmInterfaceHistoryEnabled,
+    },
+    vm_latest::{
+        tests::{tester::VmTesterBuilder, utils::verify_required_storage},
+        HistoryEnabled,
+    },
+};
 
 /// In this test we ensure that the requirements for protocol upgrade transactions are enforced by the bootloader:
 /// - This transaction must be the only one in block
@@ -34,9 +36,27 @@ fn test_protocol_upgrade_is_first() {
         .build();
 
     let bytecode_hash = hash_bytecode(&read_test_contract());
+    vm.vm
+        .storage
+        .borrow_mut()
+        .set_value(get_known_code_key(&bytecode_hash), u256_to_h256(1.into()));
 
     // Here we just use some random transaction of protocol upgrade type:
     let protocol_upgrade_transaction = get_forced_deploy_tx(&[ForceDeployment {
+        // The bytecode hash to put on an address
+        bytecode_hash,
+        // The address on which to deploy the bytecodehash to
+        address: H160::random(),
+        // Whether to run the constructor on the force deployment
+        call_constructor: false,
+        // The value with which to initialize a contract
+        value: U256::zero(),
+        // The constructor calldata
+        input: vec![],
+    }]);
+
+    // Another random upgrade transaction
+    let another_protocol_upgrade_transaction = get_forced_deploy_tx(&[ForceDeployment {
         // The bytecode hash to put on an address
         bytecode_hash,
         // The address on which to deploy the bytecodehash to
@@ -60,7 +80,7 @@ fn test_protocol_upgrade_is_first() {
     // Test 1: there must be only one system transaction in block
     vm.vm.push_transaction(protocol_upgrade_transaction.clone());
     vm.vm.push_transaction(normal_l1_transaction.clone());
-    vm.vm.push_transaction(protocol_upgrade_transaction.clone());
+    vm.vm.push_transaction(another_protocol_upgrade_transaction);
 
     vm.vm.execute(VmExecutionMode::OneTx);
     vm.vm.execute(VmExecutionMode::OneTx);

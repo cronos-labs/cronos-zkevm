@@ -7,6 +7,7 @@ services:
 
   zk:
     image: "matterlabs/zk-environment:cuda-11-8-latest"
+    container_name: zk
     depends_on:
       - geth
       - postgres
@@ -37,6 +38,6 @@ services:
   postgres:
     image: "postgres:14"
     ports:
-      - "5432:5432"
+      - 127.0.0.1:5432:5432
     environment:
       - POSTGRES_HOST_AUTH_METHOD=trust

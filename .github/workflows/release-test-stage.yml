@@ -27,9 +27,12 @@ jobs:
         uses: tj-actions/changed-files@v37
         with:
           files_yaml: |
-            # If you want to exclude some files, please adjust here.
+            # TODO: make it more granular, as already implemented in CI workflow
+            # We don't want to be rebuilding and redeploying all the Docker images when eg. only document have changed
             prover:
               - prover/**
+              - core/lib/**
+              - '!core/lib/zksync_core/**'
             core:
               - core/**
             all:
@@ -40,6 +43,8 @@ jobs:
     runs-on: [matterlabs-deployer-stage]
     outputs:
       image_tag_suffix: ${{ steps.generate-tag-suffix.outputs.image_tag_suffix }}
+      prover_fri_cpu_key_id: ${{ steps.extract-prover-fri-setup-key-ids.outputs.cpu_short_commit_sha }}
+      prover_fri_gpu_key_id: ${{ steps.extract-prover-fri-setup-key-ids.outputs.gpu_short_commit_sha }}
     steps:
       - uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3
         with:
@@ -52,9 +57,20 @@ jobs:
           ts=$(date +%s%N | cut -b1-13)
           echo "image_tag_suffix=${sha}-${ts}" >> $GITHUB_OUTPUT
 
+      - name: Generate outputs with Prover FRI setup data keys IDs
+        id: extract-prover-fri-setup-key-ids
+        run: |
+          ./prover/extract-setup-data-keys.sh >> $GITHUB_OUTPUT
+
+  build-contracts:
+    name: Build contracts
+    needs: changed_files
+    if: needs.changed_files.outputs.core == 'true' || needs.changed_files.outputs.all == 'true'
+    uses: ./.github/workflows/build-contracts.yml
+
   build-push-core-images:
     name: Build and push images
-    needs: [setup, changed_files]
+    needs: [setup, build-contracts]
     uses: ./.github/workflows/build-core-template.yml
     if: needs.changed_files.outputs.core == 'true' || needs.changed_files.outputs.all == 'true'
     with:
@@ -73,20 +89,10 @@ jobs:
       image_tag: ${{ needs.setup.outputs.image_tag }}
       image_tag_suffix: ${{ needs.setup.outputs.image_tag_suffix }}
       ERA_BELLMAN_CUDA_RELEASE: ${{ vars.ERA_BELLMAN_CUDA_RELEASE }}
+      CUDA_ARCH: "60;70;75;89"
     secrets:
       DOCKERHUB_USER: ${{ secrets.DOCKERHUB_USER }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-
-  build-gar-prover:
-    name: Build GAR prover
-    needs: [setup, build-push-core-images, build-push-prover-images]
-    uses: ./.github/workflows/build-gar-reusable.yml
-    if: needs.changed_files.outputs.prover == 'true' || needs.changed_files.outputs.all == 'true'
-    with:
-      setup_keys_id: 4989f12
-      image_tag_suffix: ${{ needs.setup.outputs.image_tag_suffix }}
-      push_asia: false
-      push_europe: false
 
   build-gar-prover-fri-gpu:
     name: Build GAR prover FRI GPU
@@ -94,5 +100,5 @@ jobs:
     uses: ./.github/workflows/build-prover-fri-gpu-gar.yml
     if: needs.changed_files.outputs.prover == 'true' || needs.changed_files.outputs.all == 'true'
     with:
-      setup_keys_id: 2d33a27-gpu
+      setup_keys_id: ${{ needs.setup.outputs.prover_fri_gpu_key_id }}
       image_tag_suffix: ${{ needs.setup.outputs.image_tag_suffix }}

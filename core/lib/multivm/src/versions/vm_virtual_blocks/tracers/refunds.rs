@@ -1,8 +1,6 @@
-use vise::{Buckets, EncodeLabelSet, EncodeLabelValue, Family, Histogram, Metrics};
-
 use std::collections::HashMap;
 
-use crate::interface::{L1BatchEnv, Refunds, VmExecutionResultAndLogs};
+use vise::{Buckets, EncodeLabelSet, EncodeLabelValue, Family, Histogram, Metrics};
 use zk_evm_1_3_3::{
     aux_structures::Timestamp,
     tracing::{BeforeExecutionData, VmLocalStateData},
@@ -16,23 +14,26 @@ use zksync_types::{
     zkevm_test_harness::witness::sort_storage_access::sort_storage_access_queries,
     L1BatchNumber, StorageKey, U256,
 };
-use zksync_utils::bytecode::bytecode_len_in_bytes;
-use zksync_utils::{ceil_div_u256, u256_to_h256};
+use zksync_utils::{bytecode::bytecode_len_in_bytes, ceil_div_u256, u256_to_h256};
 
-use crate::vm_virtual_blocks::bootloader_state::BootloaderState;
-use crate::vm_virtual_blocks::constants::{
-    BOOTLOADER_HEAP_PAGE, OPERATOR_REFUNDS_OFFSET, TX_GAS_LIMIT_OFFSET,
+use crate::{
+    interface::{dyn_tracers::vm_1_3_3::DynTracer, L1BatchEnv, Refunds, VmExecutionResultAndLogs},
+    vm_virtual_blocks::{
+        bootloader_state::BootloaderState,
+        constants::{BOOTLOADER_HEAP_PAGE, OPERATOR_REFUNDS_OFFSET, TX_GAS_LIMIT_OFFSET},
+        old_vm::{
+            events::merge_events, history_recorder::HistoryMode, memory::SimpleMemory,
+            oracles::storage::storage_key_of_log, utils::eth_price_per_pubdata_byte,
+        },
+        tracers::{
+            traits::{ExecutionEndTracer, ExecutionProcessing, VmTracer},
+            utils::{
+                gas_spent_on_bytecodes_and_long_messages_this_opcode, get_vm_hook_params, VmHook,
+            },
+        },
+        types::internals::ZkSyncVmState,
+    },
 };
-use crate::vm_virtual_blocks::old_vm::{
-    events::merge_events, history_recorder::HistoryMode, memory::SimpleMemory,
-    oracles::storage::storage_key_of_log, utils::eth_price_per_pubdata_byte,
-};
-use crate::vm_virtual_blocks::tracers::utils::gas_spent_on_bytecodes_and_long_messages_this_opcode;
-use crate::vm_virtual_blocks::tracers::{
-    traits::{DynTracer, ExecutionEndTracer, ExecutionProcessing, VmTracer},
-    utils::{get_vm_hook_params, VmHook},
-};
-use crate::vm_virtual_blocks::types::internals::ZkSyncVmState;
 
 /// Tracer responsible for collecting information about refunds.
 #[derive(Debug, Clone)]
@@ -48,6 +49,7 @@ pub(crate) struct RefundsTracer {
     gas_remaining_before: u32,
     spent_pubdata_counter_before: u32,
     gas_spent_on_bytecodes_and_long_messages: u32,
+    pubdata_published: u32,
     l1_batch: L1BatchEnv,
 }
 
@@ -62,12 +64,17 @@ impl RefundsTracer {
             gas_remaining_before: 0,
             spent_pubdata_counter_before: 0,
             gas_spent_on_bytecodes_and_long_messages: 0,
+            pubdata_published: 0,
             l1_batch,
         }
     }
-}
+    pub(crate) fn get_refunds(&self) -> Refunds {
+        Refunds {
+            gas_refunded: self.refund_gas,
+            operator_suggested_refund: self.operator_refund.unwrap_or_default(),
+        }
+    }
 
-impl RefundsTracer {
     fn requested_refund(&self) -> Option<u32> {
         self.pending_operator_refund
     }
@@ -138,7 +145,7 @@ impl RefundsTracer {
     }
 }
 
-impl<S, H: HistoryMode> DynTracer<S, H> for RefundsTracer {
+impl<S, H: HistoryMode> DynTracer<S, SimpleMemory<H>> for RefundsTracer {
     fn before_execution(
         &mut self,
         state: VmLocalStateData<'_>,
@@ -225,6 +232,7 @@ impl<S: WriteStorage, H: HistoryMode> ExecutionProcessing<S, H> for RefundsTrace
 
             let pubdata_published =
                 pubdata_published(state, self.timestamp_initial, self.l1_batch.number);
+            self.pubdata_published = pubdata_published;
 
             let current_ergs_per_pubdata_byte = state.local_state.current_ergs_per_pubdata_byte;
             let tx_body_refund = self.tx_body_refund(
@@ -388,6 +396,7 @@ impl<S: WriteStorage, H: HistoryMode> VmTracer<S, H> for RefundsTracer {
         result.refunds = Refunds {
             gas_refunded: self.refund_gas,
             operator_suggested_refund: self.operator_refund.unwrap_or_default(),
-        }
+        };
+        result.statistics.pubdata_published = self.pubdata_published;
     }
 }

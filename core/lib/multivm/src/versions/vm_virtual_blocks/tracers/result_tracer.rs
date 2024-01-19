@@ -4,27 +4,28 @@ use zk_evm_1_3_3::{
     zkevm_opcode_defs::FatPointer,
 };
 use zksync_state::{StoragePtr, WriteStorage};
-
-use crate::interface::{
-    ExecutionResult, Halt, TxRevertReason, VmExecutionMode, VmExecutionResultAndLogs,
-    VmRevertReason,
-};
 use zksync_types::U256;
 
-use crate::vm_virtual_blocks::bootloader_state::BootloaderState;
-use crate::vm_virtual_blocks::old_vm::{
-    history_recorder::HistoryMode,
-    memory::SimpleMemory,
-    utils::{vm_may_have_ended_inner, VmExecutionResult},
+use crate::{
+    interface::{
+        dyn_tracers::vm_1_3_3::DynTracer, tracer::VmExecutionStopReason, ExecutionResult, Halt,
+        TxRevertReason, VmExecutionMode, VmExecutionResultAndLogs, VmRevertReason,
+    },
+    vm_virtual_blocks::{
+        bootloader_state::BootloaderState,
+        constants::{BOOTLOADER_HEAP_PAGE, RESULT_SUCCESS_FIRST_SLOT},
+        old_vm::{
+            history_recorder::HistoryMode,
+            memory::SimpleMemory,
+            utils::{vm_may_have_ended_inner, VmExecutionResult},
+        },
+        tracers::{
+            traits::{ExecutionEndTracer, ExecutionProcessing, VmTracer},
+            utils::{get_vm_hook_params, read_pointer, VmHook},
+        },
+        types::internals::ZkSyncVmState,
+    },
 };
-use crate::vm_virtual_blocks::tracers::{
-    traits::{DynTracer, ExecutionEndTracer, ExecutionProcessing, VmTracer},
-    utils::{get_vm_hook_params, read_pointer, VmHook},
-};
-use crate::vm_virtual_blocks::types::internals::ZkSyncVmState;
-
-use crate::vm_virtual_blocks::constants::{BOOTLOADER_HEAP_PAGE, RESULT_SUCCESS_FIRST_SLOT};
-use crate::vm_virtual_blocks::VmExecutionStopReason;
 
 #[derive(Debug, Clone)]
 enum Result {
@@ -58,7 +59,7 @@ fn current_frame_is_bootloader(local_state: &VmLocalState) -> bool {
     local_state.callstack.inner.len() == 1
 }
 
-impl<S, H: HistoryMode> DynTracer<S, H> for ResultTracer {
+impl<S, H: HistoryMode> DynTracer<S, SimpleMemory<H>> for ResultTracer {
     fn after_decoding(
         &mut self,
         state: VmLocalStateData<'_>,
@@ -119,7 +120,7 @@ impl<S: WriteStorage, H: HistoryMode> ExecutionProcessing<S, H> for ResultTracer
             // One of the tracers above has requested to stop the execution.
             // If it was the correct stop we already have the result,
             // otherwise it can be out of gas error
-            VmExecutionStopReason::TracerRequestedStop => {
+            VmExecutionStopReason::TracerRequestedStop(_) => {
                 match self.execution_mode {
                     VmExecutionMode::OneTx => self.vm_stopped_execution(state, bootloader_state),
                     VmExecutionMode::Batch => self.vm_finished_execution(state),
