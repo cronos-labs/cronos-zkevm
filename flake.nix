@@ -45,7 +45,7 @@
       };
 
       prover = let
-        commonArgs =
+        commonArgs' =
           commonArgs
           // {
             cargoLock = ./prover/Cargo.lock;
@@ -55,32 +55,32 @@
               sourceRoot="."
             '';
           };
-        cargoArtifacts = craneLib.buildDepsOnly (commonArgs
+        cargoArtifacts = craneLib.buildDepsOnly (commonArgs'
           // {
           });
       in {
-        compressor = craneLib.buildPackage (commonArgs
+        compressor = craneLib.buildPackage (commonArgs'
           // {
             inherit cargoArtifacts;
 
             cargoExtraArgs = "--bin zksync_proof_fri_compressor";
           });
 
-        prover = craneLib.buildPackage (commonArgs
+        prover = craneLib.buildPackage (commonArgs'
           // {
             inherit cargoArtifacts;
 
             cargoExtraArgs = "--bin zksync_prover_fri";
           });
 
-        witness-generator = craneLib.buildPackage (commonArgs
+        witness-generator = craneLib.buildPackage (commonArgs'
           // {
             inherit cargoArtifacts;
 
             cargoExtraArgs = "--bin zksync_witness_generator";
           });
 
-        witness-vector-generator = craneLib.buildPackage (commonArgs
+        witness-vector-generator = craneLib.buildPackage (commonArgs'
           // {
             inherit cargoArtifacts;
 
