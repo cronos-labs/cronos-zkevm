@@ -86,6 +86,13 @@
 
             cargoExtraArgs = "--bin zksync_witness_vector_generator";
           });
+
+        gateway = craneLib.buildPackage (commonArgs'
+          // {
+            inherit cargoArtifacts;
+
+            cargoExtraArgs = "--bin zksync_prover_fri_gateway";
+          });
       };
 
       cargoArtifacts = craneLib.buildDepsOnly (commonArgs
@@ -112,6 +119,7 @@
       };
     in {
       packages.compressor = prover.compressor;
+      packages.gateway = prover.gateway;
       packages.prover = prover.prover;
       packages.witness-generator = prover.witness-generator;
       packages.witness-vector-generator = prover.witness-vector-generator;
