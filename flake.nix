@@ -106,6 +106,13 @@
           cargoExtraArgs = "--bin zksync_contract_verifier";
         });
 
+      server = craneLib.buildPackage (commonArgs
+        // {
+          inherit cargoArtifacts;
+
+          cargoExtraArgs = "--bin zksync_server";
+        });
+
       prover-vk-setup-data-generator-server-fri-data = stdenv.mkDerivation {
         pname = "prover-vk-setup-data-generator-server-fri-data";
         version = "1.0.0";
@@ -121,6 +128,7 @@
       packages.compressor = prover.compressor;
       packages.gateway = prover.gateway;
       packages.prover = prover.prover;
+      packages.server = prover.server;
       packages.witness-generator = prover.witness-generator;
       packages.witness-vector-generator = prover.witness-vector-generator;
 
