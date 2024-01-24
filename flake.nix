@@ -106,8 +106,8 @@
         dontBuild = true;
         dontUnpack = true;
         installPhase = ''
-          mkdir -p $out/data
-          cp $src/* $out/data
+          mkdir -p $out/prover/vk_setup_data_generator_server_fri/data
+          cp $src/* $out/prover/vk_setup_data_generator_server_fri/data
         '';
       };
     in {
