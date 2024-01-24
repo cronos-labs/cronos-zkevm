@@ -128,11 +128,11 @@
       packages.compressor = prover.compressor;
       packages.gateway = prover.gateway;
       packages.prover = prover.prover;
-      packages.server = prover.server;
       packages.witness-generator = prover.witness-generator;
       packages.witness-vector-generator = prover.witness-vector-generator;
 
       packages.contract-verifier = contract-verifier;
+      packages.server = server;
 
       packages.prover-vk-setup-data-generator-server-fri-data = prover-vk-setup-data-generator-server-fri-data;
     });
