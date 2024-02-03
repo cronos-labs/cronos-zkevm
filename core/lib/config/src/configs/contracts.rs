@@ -40,6 +40,7 @@ pub struct ContractsConfig {
     pub fri_recursion_leaf_level_vk_hash: H256,
     pub prover_at_genesis: ProverAtGenesis,
     pub snark_wrapper_vk_hash: H256,
+    pub base_token_addr: Option<Address>,
 }
 
 impl ContractsConfig {
@@ -77,6 +78,7 @@ impl ContractsConfig {
             governance_addr: Address::repeat_byte(0x13),
             prover_at_genesis: ProverAtGenesis::Fri,
             snark_wrapper_vk_hash: H256::repeat_byte(0x09),
+            base_token_addr: Some(Address::repeat_byte(0x14)),
         }
     }
 }
