@@ -196,6 +196,7 @@ pub struct BridgeAddresses {
     pub l2_erc20_default_bridge: Address,
     pub l1_weth_bridge: Option<Address>,
     pub l2_weth_bridge: Option<Address>,
+    pub base_token_addr: Option<Address>,
 }
 
 #[derive(Debug, Default, Clone, PartialEq, Serialize, Deserialize)]
