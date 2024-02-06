@@ -84,14 +84,14 @@
         buildInputs = [
           openssl
           rocksdb
-          cudatoolkit
+          cudaPackages.cudatoolkit
         ];
 
         BINDGEN_EXTRA_CLANG_ARGS = ''-I"${libclang.lib}/lib/clang/16/include"'';
         LIBCLANG_PATH = lib.makeLibraryPath [libclang.lib];
 
         CUDAARCHS = "75";
-        CUDA_PATH = cudatoolkit;
+        CUDA_PATH = cudaPackages.cudatoolkit;
         CUDA_VERSION = "12.2";
 
         BELLMAN_CUDA_DIR = bellman-cuda;
