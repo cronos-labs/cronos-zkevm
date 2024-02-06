@@ -28,7 +28,7 @@
       craneLib = (crane.mkLib pkgs).overrideToolchain toolchain;
 
       bellman-cuda = with pkgs;
-        stdenv.mkDerivation {
+        gcc11Stdenv.mkDerivation {
           pname = "bellman-cuda";
           version = "1.0.0";
 
