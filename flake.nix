@@ -55,6 +55,8 @@
             mkdir -p $out/src
             cp $src/src/bellman-cuda.h $out/src
           '';
+
+          CMAKE_CUDA_ARCHITECTURES = 80;
         };
 
       src = cleanSourceWith {
