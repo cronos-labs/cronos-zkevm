@@ -41,16 +41,15 @@
 
           nativeBuildInputs = [
             cmake
-            cudaPackages_12_2.autoAddOpenGLRunpathHook
-            cudaPackages_12_2.cuda_nvcc
+            cudaPackages.autoAddOpenGLRunpathHook
             pkg-config
           ];
 
           buildInputs = [
-            cudaPackages_12_2.cudatoolkit
+            cudatoolkit
           ];
 
-          CUDAToolkit_ROOT = cudaPackages_12_2.cudatoolkit;
+          CUDAToolkit_ROOT = cudatoolkit;
 
           postInstall = ''
             mkdir -p $out/src
@@ -84,14 +83,14 @@
         buildInputs = [
           openssl
           rocksdb
-          cudaPackages.cudatoolkit
+          cudatoolkit
         ];
 
         BINDGEN_EXTRA_CLANG_ARGS = ''-I"${libclang.lib}/lib/clang/16/include"'';
         LIBCLANG_PATH = lib.makeLibraryPath [libclang.lib];
 
         CUDAARCHS = "75";
-        CUDA_PATH = cudaPackages.cudatoolkit;
+        CUDA_PATH = cudatoolkit;
         CUDA_VERSION = "12.2";
 
         BELLMAN_CUDA_DIR = bellman-cuda;
