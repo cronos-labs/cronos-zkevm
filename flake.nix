@@ -56,7 +56,7 @@
             cp $src/src/bellman-cuda.h $out/src
           '';
 
-          CMAKE_CUDA_ARCHITECTURES = 80;
+          CMAKE_CUDA_ARCHITECTURES = 75;
         };
 
       src = cleanSourceWith {
