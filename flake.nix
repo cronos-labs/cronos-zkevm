@@ -29,7 +29,7 @@
   outputs = { self, nixpkgs, flake-utils, rust-overlay }:
     flake-utils.lib.eachDefaultSystem (system:
       let
-        cargoHash = null;
+        cargoHash = "sha256-kG5CAws05cnZGhQC/Q35FaNK2BlCMBNI3MfbV1vqiso=";
 
         pkgs = import nixpkgs { inherit system; overlays = [ rust-overlay.overlays.default ]; };
 
@@ -134,31 +134,24 @@
           inherit hardeningEnable;
 
           outputs = [
+            "out"
             "proof_fri_compressor"
+            "prover_fri"
             "prover_fri_gateway"
             "witness_generator"
             "witness_vector_generator"
           ];
 
           postInstall = ''
-            mkdir -p $out/nix-support
             for i in $outputs; do
               [[ $i == "out" ]] && continue
               mkdir -p "''${!i}/bin"
-              echo "''${!i}" >> $out/nix-support/propagated-user-env-packages
               if [[ -e "$out/bin/zksync_$i" ]]; then
                 mv "$out/bin/zksync_$i" "''${!i}/bin"
               else
                 mv "$out/bin/$i" "''${!i}/bin"
               fi
             done
-
-            mkdir -p $external_node/nix-support
-            echo "block_reverter" >> $external_node/nix-support/propagated-user-env-packages
-
-            mv $out/bin/merkle_tree_consistency_checker $server/bin
-            mkdir -p $server/nix-support
-            echo "block_reverter" >> $server/nix-support/propagated-user-env-packages
           '';
         };
       in
