@@ -22,24 +22,14 @@
 {
   description = "zkSync-era";
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.11";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     flake-utils.url = "github:numtide/flake-utils";
     rust-overlay.url = "github:oxalica/rust-overlay";
   };
   outputs = { self, nixpkgs, flake-utils, rust-overlay }:
     flake-utils.lib.eachDefaultSystem (system:
       let
-        ###########################################################################################
-        # This changes every time `Cargo.lock` changes. Set to `null` to force re-vendoring
         cargoHash = null;
-        # cargoHash = "sha256-UzIR9KhfOXFIHpj1pCjzfBmvuyvqrtbtAvVunS7djPQ=";
-        ###########################################################################################
-        officialRelease = false;
-
-        versionSuffix =
-          if officialRelease
-          then ""
-          else "pre${builtins.substring 0 8 (self.lastModifiedDate or self.lastModified or "19700101")}_${self.shortRev or "dirty"}";
 
         pkgs = import nixpkgs { inherit system; overlays = [ rust-overlay.overlays.default ]; };
 
@@ -83,7 +73,7 @@
               mkdir -p $out/cargo-vendor-dir
 
               HOME=$(pwd)
-              pushd ${src}
+              pushd ${src}/prover
               HOME=$HOME cargo vendor --no-merge-sources $out/cargo-vendor-dir > $out/.cargo/config
               sed -i -e "s#$out#import-cargo-lock#g" $out/.cargo/config
               cp $(pwd)/Cargo.lock $out/Cargo.lock
@@ -101,7 +91,6 @@
           rustc = rustVersion;
           inherit stdenv;
         });
-        zksync_server_cargoToml = (builtins.fromTOML (builtins.readFile ./core/bin/zksync_server/Cargo.toml));
 
         hardeningEnable = [ "fortify3" "pie" "relro" ];
 
@@ -113,12 +102,13 @@
             ./core
             ./sdk
             ./.github/release-please/manifest.json
+            ./prover
           ];
         };
 
-        zksync_server = with pkgs; stdenv.mkDerivation {
-          pname = "zksync";
-          version = zksync_server_cargoToml.package.version + versionSuffix;
+        prover = with pkgs; stdenv.mkDerivation {
+          pname = "prover";
+          version = "1.0.0";
 
           updateAutotoolsGnuConfigScriptsPhase = ":";
 
@@ -136,6 +126,7 @@
           ];
 
           inherit src;
+          sourceRoot = "${src.name}/prover";
           cargoBuildFlags = "--all";
           cargoBuildType = "release";
           inherit cargoDeps;
@@ -143,12 +134,10 @@
           inherit hardeningEnable;
 
           outputs = [
-            "out"
-            "contract_verifier"
-            "external_node"
-            "server"
-            "snapshots_creator"
-            "block_reverter"
+            "proof_fri_compressor"
+            "prover_fri_gateway"
+            "witness_generator"
+            "witness_vector_generator"
           ];
 
           postInstall = ''
@@ -177,8 +166,8 @@
         formatter = pkgs.nixpkgs-fmt;
 
         packages = {
-          inherit zksync_server;
-          default = zksync_server;
+          inherit prover;
+          default = prover;
           inherit cargo-vendor;
           inherit cargoDeps;
         };
