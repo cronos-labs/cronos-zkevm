@@ -41,6 +41,7 @@ use crate::{
     utils::pending_protocol_version,
 };
 
+pub mod deny_list_pool_sink;
 pub mod master_pool_sink;
 pub mod proxy;
 mod result;

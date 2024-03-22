@@ -96,6 +96,9 @@ pub struct Web3JsonRpcConfig {
     pub websocket_requests_per_minute_limit: Option<NonZeroU32>,
     /// Tree API url, currently used to proxy `getProof` calls to the tree
     pub tree_api_url: Option<String>,
+    /// Deny list addresses, block the addresses to be able to submit l2Tx through rpc server.
+    /// the address list format should be seperated by comma.
+    pub deny_list_addresses: Option<String>,
 }
 
 impl Web3JsonRpcConfig {
@@ -131,6 +134,7 @@ impl Web3JsonRpcConfig {
             max_response_body_size_mb: Default::default(),
             websocket_requests_per_minute_limit: Default::default(),
             tree_api_url: None,
+            deny_list_addresses: None,
         }
     }
 
@@ -209,6 +213,10 @@ impl Web3JsonRpcConfig {
 
     pub fn tree_api_url(&self) -> Option<&str> {
         self.tree_api_url.as_deref()
+    }
+
+    pub fn deny_list_addresses(&self) -> Option<&str> {
+        self.deny_list_addresses.as_deref()
     }
 }
 

@@ -1,6 +1,8 @@
 use std::sync::Arc;
 
-use zksync_core::api_server::tx_sender::{master_pool_sink::MasterPoolSink, proxy::TxProxy};
+use zksync_core::api_server::tx_sender::{
+    deny_list_pool_sink::DenyListPoolSink, master_pool_sink::MasterPoolSink, proxy::TxProxy,
+};
 use zksync_web3_decl::jsonrpsee::http_client::{transport::HttpBackend, HttpClient};
 
 use crate::{
@@ -14,6 +16,7 @@ use crate::{
 pub enum TxSinkLayer {
     MasterPoolSink,
     ProxySink { main_node_url: String },
+    DenyListPoolSink { deny_list_addresses: String },
 }
 
 #[async_trait::async_trait]
@@ -37,6 +40,16 @@ impl WiringLayer for TxSinkLayer {
                     .build(main_node_url)
                     .map_err(|err| WiringError::Internal(err.into()))?;
                 TxSinkResource(Arc::new(TxProxy::new(client)))
+            }
+            TxSinkLayer::DenyListPoolSink {
+                deny_list_addresses,
+            } => {
+                let pool = context
+                    .get_resource::<MasterPoolResource>()
+                    .await?
+                    .get()
+                    .await?;
+                TxSinkResource(Arc::new(DenyListPoolSink::new(pool, deny_list_addresses)))
             }
         };
         context.insert_resource(tx_sink)?;

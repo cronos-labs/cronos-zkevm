@@ -8,7 +8,9 @@ use std::{
 };
 
 use anyhow::Context as _;
-use api_server::tx_sender::master_pool_sink::MasterPoolSink;
+use api_server::tx_sender::{
+    deny_list_pool_sink::DenyListPoolSink, master_pool_sink::MasterPoolSink,
+};
 use fee_model::{ApiFeeInputProvider, BatchFeeModelInputProvider, MainNodeFeeInputProvider};
 use futures::channel::oneshot;
 use prometheus_exporter::PrometheusExporterConfig;
@@ -1155,13 +1157,24 @@ async fn build_tx_sender(
     storage_caches: PostgresStorageCaches,
 ) -> (TxSender, VmConcurrencyBarrier) {
     let sequencer_sealer = SequencerSealer::new(state_keeper_config.clone());
-    let master_pool_sink = MasterPoolSink::new(master_pool);
-    let tx_sender_builder = TxSenderBuilder::new(
-        tx_sender_config.clone(),
-        replica_pool.clone(),
-        Arc::new(master_pool_sink),
-    )
-    .with_sealer(Arc::new(sequencer_sealer));
+
+    let tx_sender_builder = if let Some(addresses) = web3_json_config.deny_list_addresses() {
+        let deny_list_pool_sink = DenyListPoolSink::new(master_pool, addresses);
+        TxSenderBuilder::new(
+            tx_sender_config.clone(),
+            replica_pool.clone(),
+            Arc::new(deny_list_pool_sink),
+        )
+        .with_sealer(Arc::new(sequencer_sealer))
+    } else {
+        let master_pool_sink = MasterPoolSink::new(master_pool);
+        TxSenderBuilder::new(
+            tx_sender_config.clone(),
+            replica_pool.clone(),
+            Arc::new(master_pool_sink),
+        )
+        .with_sealer(Arc::new(sequencer_sealer))
+    };
 
     let max_concurrency = web3_json_config.vm_concurrency_limit();
     let (vm_concurrency_limiter, vm_barrier) = VmConcurrencyLimiter::new(max_concurrency);

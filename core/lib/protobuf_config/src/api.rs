@@ -120,6 +120,7 @@ impl ProtoRepr for proto::Web3JsonRpc {
                 .transpose()
                 .context("websocket_requests_per_minute_limit")?,
             tree_api_url: self.tree_api_url.clone(),
+            deny_list_addresses: self.deny_list_addresses.clone(),
         })
     }
     fn build(this: &Self::Type) -> Self {
@@ -169,6 +170,7 @@ impl ProtoRepr for proto::Web3JsonRpc {
                 .websocket_requests_per_minute_limit
                 .map(|x| x.into()),
             tree_api_url: this.tree_api_url.clone(),
+            deny_list_addresses: this.deny_list_addresses.clone(),
         }
     }
 }

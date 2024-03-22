@@ -160,7 +160,14 @@ impl MainNodeBuilder {
         };
 
         // On main node we always use master pool sink.
-        self.node.add_layer(TxSinkLayer::MasterPoolSink);
+        if let Some(list) = rpc_config.deny_list_addresses() {
+            self.node
+                .add_layer(TxSinkLayer::DenyListPoolSink(DenyListPoolSink::new(list)));
+        } else {
+            self.node
+                .add_layer(TxSinkLayer::MasterPoolSink(MasterPoolSink::new()));
+        }
+
         self.node.add_layer(TxSenderLayer::new(
             TxSenderConfig::new(
                 &state_keeper_config,
