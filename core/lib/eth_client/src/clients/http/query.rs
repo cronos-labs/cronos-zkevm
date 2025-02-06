@@ -313,7 +313,7 @@ where
         let chunk_end = (chunk_start + FEE_HISTORY_MAX_REQUEST_CHUNK).min(upto_block);
         let chunk_size = chunk_end - chunk_start + 1;
 
-        let fee_history = client
+        let mut fee_history = client
             .fee_history(
                 U64::from(chunk_size),
                 web3::BlockNumber::from(chunk_end),
@@ -334,6 +334,11 @@ where
             return Err(EnrichedClientError::custom(message, "l1_fee_history")
                 .with_arg("chunk_size", &chunk_size)
                 .with_arg("chunk_end", &chunk_end));
+        }
+
+        if fee_history.base_fee_per_gas.len() != fee_history.base_fee_per_blob_gas.len() {
+            fee_history.base_fee_per_blob_gas =
+                vec![U256::from(0); fee_history.base_fee_per_gas.len()];
         }
 
         if fee_history.base_fee_per_gas.len() != chunk_size + 1 {
