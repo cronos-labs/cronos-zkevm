@@ -44,6 +44,7 @@ impl EthConfig {
                 time_in_mempool_in_l1_blocks_cap: 1800,
                 is_verifier_pre_fflonk: true,
                 signing_mode: SigningMode::PrivateKey,
+                max_acceptable_base_fee_in_wei: 100000000000,
             }),
             gas_adjuster: Some(GasAdjusterConfig {
                 default_priority_fee_per_gas: 1000000000,
@@ -132,6 +133,8 @@ pub struct SenderConfig {
     pub is_verifier_pre_fflonk: bool,
     /// Type of signing client for Ethereum transactions.
     pub signing_mode: SigningMode,
+    /// Max acceptable base fee the sender is allowed to use to send L1 txs.
+    pub max_acceptable_base_fee_in_wei: u64,
 }
 
 impl SenderConfig {

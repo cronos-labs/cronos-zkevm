@@ -77,6 +77,7 @@ mod tests {
                     time_in_mempool_in_l1_blocks_cap: 2000,
                     is_verifier_pre_fflonk: true,
                     signing_mode: SigningMode::PrivateKey,
+                    max_acceptable_base_fee_in_wei: 100_000_000_000,
                 }),
                 gas_adjuster: Some(GasAdjusterConfig {
                     default_priority_fee_per_gas: 20000000000,
@@ -146,6 +147,7 @@ mod tests {
             ETH_SENDER_SENDER_SIGNING_MODE="PrivateKey"
             ETH_CLIENT_WEB3_URL="http://127.0.0.1:8545"
             ETH_CLIENT_GATEWAY_WEB3_URL="http://127.0.0.1:8547"
+            ETH_SENDER_SENDER_MAX_ACCEPTABLE_BASE_FEE_IN_WEI="100000000000"
 
         "#;
         lock.set_env(config);
