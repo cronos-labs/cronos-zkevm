@@ -55,6 +55,7 @@ fn test_encoding() {
         rng,
     );
     test_encode_all_formats::<ReprConv<proto::general::GeneralConfig>>(rng);
+    test_encode_all_formats::<ReprConv<proto::tx_sink::TxSink>>(rng);
 }
 
 #[test]

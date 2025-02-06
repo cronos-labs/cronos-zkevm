@@ -62,6 +62,8 @@ pub enum Component {
     ExternalProofIntegrationApi,
     /// VM runner-based component that allows to test experimental VM features. Doesn't save any data to Postgres.
     VmPlayground,
+    /// Component for filtering L2 transactions by denylist
+    TxSinkDenyList,
 }
 
 #[derive(Debug)]
@@ -107,6 +109,7 @@ impl FromStr for Components {
             "external_proof_integration_api" => {
                 Ok(Components(vec![Component::ExternalProofIntegrationApi]))
             }
+            "deny_list" => Ok(Components(vec![Component::TxSinkDenyList])),
             other => Err(format!("{} is not a valid component name", other)),
         }
     }
