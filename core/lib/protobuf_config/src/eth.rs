@@ -63,6 +63,24 @@ impl proto::SettlementMode {
     }
 }
 
+impl proto::SigningMode {
+    fn new(x: &configs::eth_sender::SigningMode) -> Self {
+        use configs::eth_sender::SigningMode as From;
+        match x {
+            From::PrivateKey => Self::PrivateKey,
+            From::GcloudKms => Self::GcloudKms,
+        }
+    }
+
+    fn parse(&self) -> configs::eth_sender::SigningMode {
+        use configs::eth_sender::SigningMode as To;
+        match self {
+            Self::PrivateKey => To::PrivateKey,
+            Self::GcloudKms => To::GcloudKms,
+        }
+    }
+}
+
 impl ProtoRepr for proto::Eth {
     type Type = configs::eth_sender::EthConfig;
 
@@ -129,6 +147,10 @@ impl ProtoRepr for proto::Sender {
                 .time_in_mempool_in_l1_blocks_cap
                 .unwrap_or(Self::Type::default_time_in_mempool_in_l1_blocks_cap()),
             is_verifier_pre_fflonk: self.is_verifier_pre_fflonk.unwrap_or(true),
+            signing_mode: required(&self.signing_mode)
+                .and_then(|x| Ok(proto::SigningMode::try_from(*x)?))
+                .context("signing_mode")?
+                .parse(),
         })
     }
 
@@ -158,6 +180,7 @@ impl ProtoRepr for proto::Sender {
             tx_aggregation_paused: Some(this.tx_aggregation_paused),
             time_in_mempool_in_l1_blocks_cap: Some(this.time_in_mempool_in_l1_blocks_cap),
             is_verifier_pre_fflonk: Some(this.is_verifier_pre_fflonk),
+            signing_mode: Some(proto::SigningMode::new(&this.signing_mode).into()),
         }
     }
 }

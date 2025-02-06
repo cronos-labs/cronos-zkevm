@@ -17,3 +17,11 @@ zksync_crypto_primitives.workspace = true
 async-trait.workspace = true
 rlp.workspace = true
 thiserror.workspace = true
+google-cloud-kms = { git="https://github.com/yoshidan/google-cloud-rust.git", tag="v20240627", features=["eth"]}
+google-cloud-gax = { git="https://github.com/yoshidan/google-cloud-rust.git", tag="v20240627"}
+hex = "0.4.3"
+tracing = "0.1"
+ethers-signers = "2.0"
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["full"] }
