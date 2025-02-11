@@ -20,6 +20,7 @@ impl AddressWallet {
 pub struct Wallet {
     address: Address,
     private_key: K256PrivateKey,
+    zero_private_key: bool,
 }
 
 impl Wallet {
@@ -27,6 +28,7 @@ impl Wallet {
         Self {
             address: private_key.address(),
             private_key,
+            zero_private_key: false,
         }
     }
 
@@ -46,6 +48,17 @@ impl Wallet {
         Ok(Self {
             address: calculated_address,
             private_key,
+            zero_private_key: false,
+        })
+    }
+
+    pub fn ignore_private_key(address: Address) -> anyhow::Result<Self> {
+        let private_key = K256PrivateKey::random();
+
+        Ok(Self {
+            address,
+            private_key,
+            zero_private_key: true,
         })
     }
 

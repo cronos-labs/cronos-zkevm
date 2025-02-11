@@ -13,26 +13,36 @@ impl ProtoRepr for proto::Wallets {
     fn read(&self) -> anyhow::Result<Self::Type> {
         let eth_sender = if self.operator.is_some() && self.blob_operator.is_some() {
             let blob_operator = if let Some(blob_operator) = &self.blob_operator {
-                Some(Wallet::from_private_key_bytes(
-                    parse_h256(required(&blob_operator.private_key).context("blob operator")?)?,
-                    blob_operator
-                        .address
-                        .as_ref()
-                        .and_then(|a| parse_h160(a).ok()),
-                )?)
+                let zero_private_key = blob_operator.zero_private_key.unwrap_or(false);
+                Some(if zero_private_key {
+                    Wallet::ignore_private_key(parse_h160(required(&blob_operator.address)?)?)?
+                } else {
+                    Wallet::from_private_key_bytes(
+                        parse_h256(required(&blob_operator.private_key).context("blob operator")?)?,
+                        blob_operator
+                            .address
+                            .as_ref()
+                            .and_then(|a| parse_h160(a).ok()),
+                    )?
+                })
             } else {
                 None
             };
 
             let operator_wallet = &self.operator.clone().context("Operator private key")?;
+            let zero_private_key = operator_wallet.zero_private_key.unwrap_or(false);
 
-            let operator = Wallet::from_private_key_bytes(
-                parse_h256(required(&operator_wallet.private_key).context("operator")?)?,
-                operator_wallet
-                    .address
-                    .as_ref()
-                    .and_then(|a| parse_h160(a).ok()),
-            )?;
+            let operator = if zero_private_key {
+                Wallet::ignore_private_key(parse_h160(required(&operator_wallet.address)?)?)?
+            } else {
+                Wallet::from_private_key_bytes(
+                    parse_h256(required(&operator_wallet.private_key).context("operator")?)?,
+                    operator_wallet
+                        .address
+                        .as_ref()
+                        .and_then(|a| parse_h160(a).ok()),
+                )?
+            };
 
             Some(EthSender {
                 operator,
@@ -83,6 +93,7 @@ impl ProtoRepr for proto::Wallets {
             proto::PrivateKeyWallet {
                 address: Some(format!("{:?}", addr)),
                 private_key: Some(hex::encode(pk.expose_secret().secret_bytes())),
+                zero_private_key: Some(false),
             }
         };
 
