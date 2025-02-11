@@ -5,7 +5,7 @@ package zksync.config.wallets;
 message PrivateKeyWallet {
   optional string address = 1; // optional
   optional string private_key = 2; // required
-  optional bool zero_private_key = 3; // optional, this is hack for gkms_signer
+  optional bool ignore_private_key = 3; // optional, this is hack for gkms_signer
 }
 
 message AddressWallet {
