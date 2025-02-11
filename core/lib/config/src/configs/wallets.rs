@@ -53,6 +53,7 @@ impl Wallet {
     }
 
     pub fn ignore_private_key(address: Address) -> anyhow::Result<Self> {
+        // we need to assign random private key for ignore_private_key wallets anyway to keep compatibility with existing systems
         let private_key = K256PrivateKey::random();
 
         Ok(Self {
