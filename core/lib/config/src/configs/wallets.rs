@@ -20,7 +20,6 @@ impl AddressWallet {
 pub struct Wallet {
     address: Address,
     private_key: K256PrivateKey,
-    ignore_private_key: bool,
 }
 
 impl Wallet {
@@ -28,7 +27,6 @@ impl Wallet {
         Self {
             address: private_key.address(),
             private_key,
-            ignore_private_key: false,
         }
     }
 
@@ -48,7 +46,6 @@ impl Wallet {
         Ok(Self {
             address: calculated_address,
             private_key,
-            ignore_private_key: false,
         })
     }
 
@@ -59,7 +56,6 @@ impl Wallet {
         Ok(Self {
             address,
             private_key,
-            ignore_private_key: true,
         })
     }
 
