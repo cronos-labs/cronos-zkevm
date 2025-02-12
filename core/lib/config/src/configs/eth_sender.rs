@@ -43,7 +43,6 @@ impl EthConfig {
                 tx_aggregation_only_prove_and_execute: false,
                 time_in_mempool_in_l1_blocks_cap: 1800,
                 is_verifier_pre_fflonk: true,
-                signing_mode: SigningMode::PrivateKey,
                 max_acceptable_base_fee_in_wei: 100000000000,
             }),
             gas_adjuster: Some(GasAdjusterConfig {
@@ -131,8 +130,6 @@ pub struct SenderConfig {
     #[serde(default = "SenderConfig::default_time_in_mempool_in_l1_blocks_cap")]
     pub time_in_mempool_in_l1_blocks_cap: u32,
     pub is_verifier_pre_fflonk: bool,
-    /// Type of signing client for Ethereum transactions.
-    pub signing_mode: SigningMode,
     /// Max acceptable base fee the sender is allowed to use to send L1 txs.
     pub max_acceptable_base_fee_in_wei: u64,
 }
