@@ -80,132 +80,144 @@ impl WiringLayer for PKSigningEthClientLayer {
             .await
             .map_err(WiringError::internal)?;
 
-        let signing_client;
-        let signing_client_for_gateway;
-        let mut signing_client_for_blobs = None;
+        let (signing_client, signing_client_for_blobs, signing_client_for_gateway) =
+            if let Some(gkms_op_key_name) = self.wallets.operator.gkms_key_name() {
+                tracing::info!("KMS op key name in wallet: {:?}", gkms_op_key_name);
 
-        // if the wallet.yaml has gkms key setup for operator, will use it instead of using the gkms settings in env
-        if let Some(gkms_op_key_name) = self.wallets.operator.gkms_key_name() {
-            tracing::info!("KMS op key name in wallet: {:?}", gkms_op_key_name);
+                let sc = GKMSSigningClient::new_raw(
+                    self.contracts_config.diamond_proxy_addr,
+                    gas_adjuster_config.default_priority_fee_per_gas,
+                    l1_chain_id,
+                    query_client.clone(),
+                    gkms_op_key_name.clone(),
+                )
+                .await;
 
-            let sc = GKMSSigningClient::new_raw(
-                self.contracts_config.diamond_proxy_addr,
-                gas_adjuster_config.default_priority_fee_per_gas,
-                l1_chain_id,
-                query_client.clone(),
-                gkms_op_key_name.clone(),
-            )
-            .await;
-
-            let op_address = self.wallets.operator.address();
-            if sc.get_address() != op_address {
-                return Err(WiringError::internal(anyhow::anyhow!(
-                    "Operator address mismatch: expected {}, got {}",
-                    op_address,
-                    sc.get_address()
-                )));
-            }
-
-            signing_client = BoundEthInterfaceResource(Box::new(sc));
-
-            if let Some(blob_operator) = self.wallets.blob_operator {
-                if let Some(gkms_op_blob_key_name) = blob_operator.gkms_key_name() {
-                    tracing::info!(
-                        "KMS op blob key name in wallet: {:?}",
-                        gkms_op_blob_key_name
-                    );
-
-                    let blobs_resources = GKMSSigningClient::new_raw(
-                        self.contracts_config.diamond_proxy_addr,
-                        gas_adjuster_config.default_priority_fee_per_gas,
-                        l1_chain_id,
-                        query_client,
-                        gkms_op_blob_key_name.clone(),
-                    )
-                    .await;
-
-                    if blobs_resources.get_address() != blob_operator.address() {
-                        return Err(WiringError::internal(anyhow::anyhow!(
-                            "Blob operator address mismatch: expected {}, got {}",
-                            blob_operator.address(),
-                            blobs_resources.get_address()
-                        )));
-                    }
-
-                    signing_client_for_blobs =
-                        Some(BoundEthInterfaceForBlobsResource(Box::new(blobs_resources)));
+                let op_address = self.wallets.operator.address();
+                if sc.get_address() != op_address {
+                    return Err(WiringError::internal(anyhow::anyhow!(
+                        "Operator address mismatch: expected {}, got {}",
+                        op_address,
+                        sc.get_address()
+                    )));
                 }
-            }
 
-            signing_client_for_gateway = if let (Some(client), Some(gateway_contracts)) =
-                (&input.gateway_client, self.gateway_chain_config.as_ref())
-            {
-                if gateway_contracts.gateway_chain_id.0 != 0u64 {
-                    let GatewayEthInterfaceResource(gateway_client) = client;
-                    let signing_client_for_gateway = GKMSSigningClient::new_raw(
-                        gateway_contracts.diamond_proxy_addr,
-                        gas_adjuster_config.default_priority_fee_per_gas,
-                        gateway_contracts.gateway_chain_id,
-                        gateway_client.clone(),
-                        gkms_op_key_name,
-                    )
-                    .await;
+                let signing_client = BoundEthInterfaceResource(Box::new(sc));
 
-                    Some(BoundEthInterfaceForL2Resource(Box::new(
-                        signing_client_for_gateway,
-                    )))
+                let signing_client_for_blobs =
+                    if let Some(blob_operator) = self.wallets.blob_operator {
+                        if let Some(gkms_op_blob_key_name) = blob_operator.gkms_key_name() {
+                            tracing::info!(
+                                "KMS op blob key name in wallet: {:?}",
+                                gkms_op_blob_key_name
+                            );
+
+                            let blobs_resources = GKMSSigningClient::new_raw(
+                                self.contracts_config.diamond_proxy_addr,
+                                gas_adjuster_config.default_priority_fee_per_gas,
+                                l1_chain_id,
+                                query_client,
+                                gkms_op_blob_key_name.clone(),
+                            )
+                            .await;
+
+                            if blobs_resources.get_address() != blob_operator.address() {
+                                return Err(WiringError::internal(anyhow::anyhow!(
+                                    "Blob operator address mismatch: expected {}, got {}",
+                                    blob_operator.address(),
+                                    blobs_resources.get_address()
+                                )));
+                            }
+
+                            Some(BoundEthInterfaceForBlobsResource(Box::new(blobs_resources)))
+                        } else {
+                            None
+                        }
+                    } else {
+                        None
+                    };
+
+                let signing_client_for_gateway = if let (Some(client), Some(gateway_contracts)) =
+                    (&input.gateway_client, self.gateway_chain_config.as_ref())
+                {
+                    if gateway_contracts.gateway_chain_id.0 != 0u64 {
+                        let GatewayEthInterfaceResource(gateway_client) = client;
+                        let signing_client_for_gateway = GKMSSigningClient::new_raw(
+                            gateway_contracts.diamond_proxy_addr,
+                            gas_adjuster_config.default_priority_fee_per_gas,
+                            gateway_contracts.gateway_chain_id,
+                            gateway_client.clone(),
+                            gkms_op_key_name,
+                        )
+                        .await;
+
+                        Some(BoundEthInterfaceForL2Resource(Box::new(
+                            signing_client_for_gateway,
+                        )))
+                    } else {
+                        None
+                    }
                 } else {
                     None
-                }
+                };
+
+                (
+                    signing_client,
+                    signing_client_for_blobs,
+                    signing_client_for_gateway,
+                )
             } else {
-                None
-            };
-        } else {
-            let private_key = self.wallets.operator.private_key();
+                let private_key = self.wallets.operator.private_key();
 
-            let sc = PKSigningClient::new_raw(
-                private_key.clone(),
-                self.contracts_config.diamond_proxy_addr,
-                gas_adjuster_config.default_priority_fee_per_gas,
-                l1_chain_id,
-                query_client.clone(),
-            );
-            signing_client = BoundEthInterfaceResource(Box::new(sc));
-
-            signing_client_for_blobs = self.wallets.blob_operator.map(|blob_operator| {
-                let private_key = blob_operator.private_key();
-                let signing_client_for_blobs = PKSigningClient::new_raw(
+                let sc = PKSigningClient::new_raw(
                     private_key.clone(),
                     self.contracts_config.diamond_proxy_addr,
                     gas_adjuster_config.default_priority_fee_per_gas,
                     l1_chain_id,
-                    query_client,
+                    query_client.clone(),
                 );
-                BoundEthInterfaceForBlobsResource(Box::new(signing_client_for_blobs))
-            });
+                let signing_client = BoundEthInterfaceResource(Box::new(sc));
 
-            signing_client_for_gateway = if let (Some(client), Some(gateway_contracts)) =
-                (&input.gateway_client, self.gateway_chain_config.as_ref())
-            {
-                if gateway_contracts.gateway_chain_id.0 != 0u64 {
-                    let GatewayEthInterfaceResource(gateway_client) = client;
-                    let signing_client_for_gateway = PKSigningClient::new_raw(
+                let signing_client_for_blobs = self.wallets.blob_operator.map(|blob_operator| {
+                    let private_key = blob_operator.private_key();
+                    let signing_client_for_blobs = PKSigningClient::new_raw(
                         private_key.clone(),
-                        gateway_contracts.diamond_proxy_addr,
+                        self.contracts_config.diamond_proxy_addr,
                         gas_adjuster_config.default_priority_fee_per_gas,
-                        gateway_contracts.gateway_chain_id,
-                        gateway_client.clone(),
+                        l1_chain_id,
+                        query_client,
                     );
-                    Some(BoundEthInterfaceForL2Resource(Box::new(
-                        signing_client_for_gateway,
-                    )))
+                    BoundEthInterfaceForBlobsResource(Box::new(signing_client_for_blobs))
+                });
+
+                let signing_client_for_gateway = if let (Some(client), Some(gateway_contracts)) =
+                    (&input.gateway_client, self.gateway_chain_config.as_ref())
+                {
+                    if gateway_contracts.gateway_chain_id.0 != 0u64 {
+                        let GatewayEthInterfaceResource(gateway_client) = client;
+                        let signing_client_for_gateway = PKSigningClient::new_raw(
+                            private_key.clone(),
+                            gateway_contracts.diamond_proxy_addr,
+                            gas_adjuster_config.default_priority_fee_per_gas,
+                            gateway_contracts.gateway_chain_id,
+                            gateway_client.clone(),
+                        );
+                        Some(BoundEthInterfaceForL2Resource(Box::new(
+                            signing_client_for_gateway,
+                        )))
+                    } else {
+                        None
+                    }
                 } else {
                     None
-                }
-            } else {
-                None
+                };
+
+                (
+                    signing_client,
+                    signing_client_for_blobs,
+                    signing_client_for_gateway,
+                )
             };
-        }
 
         Ok(Output {
             signing_client,
