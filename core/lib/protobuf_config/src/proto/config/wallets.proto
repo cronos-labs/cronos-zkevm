@@ -17,5 +17,4 @@ message Wallets {
   optional PrivateKeyWallet blob_operator = 2; // Private key is required
   optional AddressWallet fee_account = 3; // Only address required for server
   optional PrivateKeyWallet token_multiplier_setter = 4; // Private key is required
-  optional bool gkms_mode = 5; // optional
 }
