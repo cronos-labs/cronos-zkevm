@@ -11,11 +11,15 @@ use crate::{parse_h160, parse_h256, proto::wallets as proto};
 impl ProtoRepr for proto::Wallets {
     type Type = configs::wallets::Wallets;
     fn read(&self) -> anyhow::Result<Self::Type> {
+        let gkms_mode = self.gkms_mode.unwrap_or(false);
         let eth_sender = if self.operator.is_some() && self.blob_operator.is_some() {
             let blob_operator = if let Some(blob_operator) = &self.blob_operator {
-                let ignore_private_key = blob_operator.ignore_private_key.unwrap_or(false);
-                Some(if ignore_private_key {
-                    Wallet::ignore_private_key(parse_h160(required(&blob_operator.address)?)?)?
+                Some(if gkms_mode {
+                    // will validate the address and the key name when init the gkms_eth_signer
+                    Wallet::from_gkms_signer(
+                        parse_h160(required(&blob_operator.address)?)?,
+                        required(&blob_operator.gkms_key_name)?.to_string(),
+                    )?
                 } else {
                     Wallet::from_private_key_bytes(
                         parse_h256(required(&blob_operator.private_key).context("blob operator")?)?,
@@ -30,10 +34,12 @@ impl ProtoRepr for proto::Wallets {
             };
 
             let operator_wallet = &self.operator.clone().context("Operator private key")?;
-            let ignore_private_key = operator_wallet.ignore_private_key.unwrap_or(false);
 
-            let operator = if ignore_private_key {
-                Wallet::ignore_private_key(parse_h160(required(&operator_wallet.address)?)?)?
+            let operator = if gkms_mode {
+                Wallet::from_gkms_signer(
+                    parse_h160(required(&operator_wallet.address)?)?,
+                    required(&operator_wallet.gkms_key_name)?.to_string(),
+                )?
             } else {
                 Wallet::from_private_key_bytes(
                     parse_h256(required(&operator_wallet.private_key).context("operator")?)?,
@@ -93,7 +99,7 @@ impl ProtoRepr for proto::Wallets {
             proto::PrivateKeyWallet {
                 address: Some(format!("{:?}", addr)),
                 private_key: Some(hex::encode(pk.expose_secret().secret_bytes())),
-                ignore_private_key: Some(false),
+                gkms_key_name: None,
             }
         };
 
@@ -135,6 +141,7 @@ impl ProtoRepr for proto::Wallets {
             operator,
             fee_account,
             token_multiplier_setter,
+            gkms_mode: Some(false),
         }
     }
 }
