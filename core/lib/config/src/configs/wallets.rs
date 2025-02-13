@@ -20,6 +20,7 @@ impl AddressWallet {
 pub struct Wallet {
     address: Address,
     private_key: K256PrivateKey,
+    gkms_key_name: Option<String>,
 }
 
 impl Wallet {
@@ -27,6 +28,7 @@ impl Wallet {
         Self {
             address: private_key.address(),
             private_key,
+            gkms_key_name: None,
         }
     }
 
@@ -46,6 +48,16 @@ impl Wallet {
         Ok(Self {
             address: calculated_address,
             private_key,
+            gkms_key_name: None,
+        })
+    }
+
+    pub fn from_gkms_signer(address: Address, key_name: String) -> anyhow::Result<Self> {
+        // we need to assign random private key for ignore_private_key wallets anyway to keep compatibility with existing systems
+        Ok(Self {
+            address,
+            private_key: K256PrivateKey::random(),
+            gkms_key_name: Some(key_name),
         })
     }
 
@@ -55,6 +67,10 @@ impl Wallet {
 
     pub fn private_key(&self) -> &K256PrivateKey {
         &self.private_key
+    }
+
+    pub fn gkms_key_name(&self) -> Option<String> {
+        self.gkms_key_name.clone()
     }
 }
 
