@@ -4,7 +4,9 @@ pub use self::{
     healtcheck_server::HealthCheckLayer,
     server::{Web3ServerLayer, Web3ServerOptionalConfig},
     tx_sender::{PostgresStorageCachesConfig, TxSenderLayer},
-    tx_sink::{MasterPoolSinkLayer, ProxySinkLayer, WhitelistedMasterPoolSinkLayer},
+    tx_sink::{
+        DenyListPoolSinkLayer, MasterPoolSinkLayer, ProxySinkLayer, WhitelistedMasterPoolSinkLayer,
+    },
 };
 
 mod allow_list;
