@@ -8,6 +8,7 @@ use zksync_config::{
             chain::L2Contracts, ecosystem::L1SpecificContracts, SettlementLayerSpecificContracts,
         },
         da_client::DAClientConfig,
+        eth_sender::SigningMode,
         secrets::DataAvailabilitySecrets,
         wallets::Wallets,
         GeneralConfig, Secrets,
@@ -50,7 +51,7 @@ use zksync_node_framework::{
             main_node_strategy::MainNodeInitStrategyLayer, NodeStorageInitializerLayer,
         },
         object_store::ObjectStoreLayer,
-        pk_signing_eth_client::PKSigningEthClientLayer,
+        pk_signing_eth_client::{PKSigningEthClientLayer, SigningEthClientType},
         pools_layer::PoolsLayerBuilder,
         postgres::PostgresLayer,
         prometheus_exporter::PrometheusExporterLayer,
@@ -187,8 +188,28 @@ impl MainNodeBuilder {
             .context("Gas adjuster")?;
 
         let wallets = try_load_config!(self.wallets.eth_sender);
-        self.node
-            .add_layer(PKSigningEthClientLayer::new(gas_adjuster, wallets));
+
+        let eth_sender = self
+            .configs
+            .eth
+            .clone()
+            .context("eth_config")?
+            .sender
+            .context("sender")?;
+
+        let signing_mode = eth_sender.signing_mode;
+        tracing::info!("Using signing mode: {:?}", signing_mode);
+
+        let client_type = match signing_mode {
+            SigningMode::GcloudKms => SigningEthClientType::GKMSSigningEthClient,
+            SigningMode::PrivateKey => SigningEthClientType::PKSigningEthClient,
+        };
+
+        self.node.add_layer(PKSigningEthClientLayer::new(
+            gas_adjuster,
+            wallets,
+            client_type,
+        ));
         Ok(self)
     }
 

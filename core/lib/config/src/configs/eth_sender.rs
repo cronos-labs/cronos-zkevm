@@ -11,7 +11,7 @@ use crate::EthWatchConfig;
 #[derive(Debug, Deserialize, Clone, PartialEq)]
 pub struct EthConfig {
     /// Options related to the Ethereum sender directly.
-    sender: Option<SenderConfig>,
+    pub sender: Option<SenderConfig>,
     /// Options related to the `GasAdjuster` submodule.
     pub gas_adjuster: Option<GasAdjusterConfig>,
     pub watcher: Option<EthWatchConfig>,
@@ -54,6 +54,7 @@ impl EthConfig {
                 tx_aggregation_only_prove_and_execute: false,
                 time_in_mempool_in_l1_blocks_cap: 1800,
                 is_verifier_pre_fflonk: true,
+                signing_mode: SigningMode::PrivateKey,
             }),
             gas_adjuster: Some(GasAdjusterConfig {
                 default_priority_fee_per_gas: 1000000000,
@@ -94,6 +95,13 @@ pub enum ProofSendingMode {
 pub enum ProofLoadingMode {
     OldProofFromDb,
     FriProofFromGcs,
+}
+
+#[derive(Debug, Deserialize, Clone, Copy, PartialEq, Default)]
+pub enum SigningMode {
+    #[default]
+    PrivateKey,
+    GcloudKms,
 }
 
 #[derive(Debug, Deserialize, Clone, PartialEq)]
@@ -138,6 +146,8 @@ pub struct SenderConfig {
     #[serde(default = "SenderConfig::default_time_in_mempool_in_l1_blocks_cap")]
     pub time_in_mempool_in_l1_blocks_cap: u32,
     pub is_verifier_pre_fflonk: bool,
+    /// Type of signing client for Ethereum transactions.
+    pub signing_mode: SigningMode,
 }
 
 impl SenderConfig {
