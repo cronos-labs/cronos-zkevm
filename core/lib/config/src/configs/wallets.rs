@@ -25,24 +25,31 @@ impl AddressWallet {
 }
 
 #[derive(Debug)]
-struct K256PrivateKeyDeserializer;
+struct OptionK256PrivateKeyDeserializer;
 
-impl DeserializeParam<K256PrivateKey> for K256PrivateKeyDeserializer {
+impl DeserializeParam<Option<K256PrivateKey>> for OptionK256PrivateKeyDeserializer {
     const EXPECTING: BasicTypes = BasicTypes::STRING;
 
     fn deserialize_param(
         &self,
         ctx: DeserializeContext<'_>,
         param: &'static ParamMetadata,
-    ) -> Result<K256PrivateKey, ErrorWithOrigin> {
+    ) -> Result<Option<K256PrivateKey>, ErrorWithOrigin> {
         let de = ctx.current_value_deserializer(param.name)?;
         let key = H256::deserialize(de)?;
-        K256PrivateKey::from_bytes(key).map_err(DeError::custom)
+        Ok(Some(
+            K256PrivateKey::from_bytes(key).map_err(DeError::custom)?,
+        ))
     }
 
-    fn serialize_param(&self, param: &K256PrivateKey) -> Value {
-        let key_bytes = *param.expose_secret().as_ref();
-        serde_json::to_value(H256(key_bytes)).unwrap()
+    fn serialize_param(&self, param: &Option<K256PrivateKey>) -> Value {
+        match param {
+            Some(priv_key) => {
+                let key_bytes = *priv_key.expose_secret().as_ref();
+                serde_json::to_value(H256(key_bytes)).unwrap()
+            }
+            None => Value::Null,
+        }
     }
 }
 
@@ -51,14 +58,17 @@ impl DeserializeParam<K256PrivateKey> for K256PrivateKeyDeserializer {
 pub struct Wallet {
     /// Address of the account. Used to validate private key integrity.
     address: Option<Address>,
-    #[config(secret, with = K256PrivateKeyDeserializer)]
-    private_key: K256PrivateKey,
+    #[config(secret, default, with = OptionK256PrivateKeyDeserializer)]
+    private_key: Option<K256PrivateKey>,
+    gkms_key_name: Option<String>,
 }
 
 impl Wallet {
     fn validate_address(&self) -> Result<(), ErrorWithOrigin> {
         if let Some(address) = self.address {
-            if address != self.private_key.address() {
+            if self.gkms_key_name.is_none()
+                && address != self.private_key.as_ref().unwrap().address()
+            {
                 return Err(ErrorWithOrigin::custom(
                     "Malformed wallet; `address` doesn't correspond to `private_key`",
                 ));
@@ -82,16 +92,31 @@ impl Wallet {
 
         Ok(Self {
             address,
-            private_key,
+            private_key: Some(private_key),
+            gkms_key_name: None,
+        })
+    }
+
+    pub fn from_gkms_signer(address: Address, key_name: String) -> anyhow::Result<Self> {
+        // we need to assign random private key for ignore_private_key wallets anyway to keep compatibility with existing systems
+        Ok(Self {
+            address: Some(address),
+            private_key: Some(K256PrivateKey::random()),
+            gkms_key_name: Some(key_name),
         })
     }
 
     pub fn address(&self) -> Address {
-        self.address.unwrap_or_else(|| self.private_key.address())
+        self.address
+            .unwrap_or_else(|| self.private_key.as_ref().unwrap().address())
     }
 
     pub fn private_key(&self) -> &K256PrivateKey {
-        &self.private_key
+        self.private_key.as_ref().unwrap()
+    }
+
+    pub fn gkms_key_name(&self) -> Option<String> {
+        self.gkms_key_name.clone()
     }
 }
 
