@@ -47,9 +47,9 @@ use zksync_metadata_calculator::{
 };
 use zksync_node_api_server::{
     node::{
-        DeploymentAllowListLayer, HealthCheckLayer, MasterPoolSinkLayer, MempoolCacheLayer,
-        PostgresStorageCachesConfig, TxSenderLayer, Web3ServerLayer, Web3ServerOptionalConfig,
-        WhitelistedMasterPoolSinkLayer,
+        DenyListPoolSinkLayer, DeploymentAllowListLayer, HealthCheckLayer, MasterPoolSinkLayer,
+        MempoolCacheLayer, PostgresStorageCachesConfig, TxSenderLayer, Web3ServerLayer,
+        Web3ServerOptionalConfig, WhitelistedMasterPoolSinkLayer,
     },
     tx_sender::TxSenderConfig,
     web3::{state::InternalApiConfigBase, Namespace},
@@ -353,7 +353,7 @@ impl MainNodeBuilder {
         Ok(self)
     }
 
-    fn add_tx_sender_layer(mut self) -> anyhow::Result<Self> {
+    fn add_tx_sender_layer(mut self, deny_list_enabled: bool) -> anyhow::Result<Self> {
         let sk_config = try_load_config!(self.configs.state_keeper_config);
         let rpc_config = try_load_config!(self.configs.api_config).web3_json_rpc;
         let deployment_allowlist = sk_config.deployment_allowlist.clone();
@@ -370,7 +370,16 @@ impl MainNodeBuilder {
         if deployment_allowlist.is_some() {
             self.node.add_layer(WhitelistedMasterPoolSinkLayer);
         } else {
-            self.node.add_layer(MasterPoolSinkLayer);
+            let tx_sink_config = try_load_config!(self.configs.tx_sink_config);
+            if deny_list_enabled && tx_sink_config.deny_list().is_some() {
+                tracing::info!("run DenyListPoolSinkLayer {:?}", tx_sink_config.deny_list());
+                self.node.add_layer(DenyListPoolSinkLayer::new(
+                    tx_sink_config.deny_list().unwrap(),
+                ));
+            } else {
+                tracing::info!("run MasterPoolSinkLayer");
+                self.node.add_layer(MasterPoolSinkLayer);
+            }
         }
 
         let layer = TxSenderLayer::new(
@@ -759,6 +768,8 @@ impl MainNodeBuilder {
             self = self.add_pk_signing_client_layer()?;
         }
 
+        let mut deny_list_enabled = false;
+
         // Add "component-specific" layers.
         // Note that the layers are added only once, so it's fine to add the same layer multiple times.
         for component in &components {
@@ -778,7 +789,7 @@ impl MainNodeBuilder {
                         .add_allow_list_task_layer()?
                         .add_bridge_addresses_updater_layer()?
                         .add_l1_gas_layer()?
-                        .add_tx_sender_layer()?
+                        .add_tx_sender_layer(deny_list_enabled)?
                         .add_tree_api_client_layer()?
                         .add_api_caches_layer()?
                         .add_http_web3_api_layer()?;
@@ -788,7 +799,7 @@ impl MainNodeBuilder {
                         .add_allow_list_task_layer()?
                         .add_bridge_addresses_updater_layer()?
                         .add_l1_gas_layer()?
-                        .add_tx_sender_layer()?
+                        .add_tx_sender_layer(deny_list_enabled)?
                         .add_tree_api_client_layer()?
                         .add_api_caches_layer()?
                         .add_ws_web3_api_layer()?;
@@ -851,6 +862,10 @@ impl MainNodeBuilder {
                 }
                 Component::ExternalProofIntegrationApi => {
                     self = self.add_external_proof_integration_api_layer()?;
+                }
+                Component::TxSinkDenyList => {
+                    tracing::info!("L2 denylist enabled.");
+                    deny_list_enabled = true;
                 }
             }
         }

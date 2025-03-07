@@ -14,6 +14,7 @@ use crate::{
         prover_job_monitor::ProverJobMonitorConfig,
         pruning::PruningConfig,
         snapshot_recovery::SnapshotRecoveryConfig,
+        tx_sink::TxSinkConfig,
         vm_runner::{BasicWitnessInputProducerConfig, ProtectiveReadsWriterConfig},
         wallets::Wallets,
         CommitmentGeneratorConfig, ConsistencyCheckerConfig, ExperimentalVmConfig,
@@ -100,6 +101,8 @@ pub struct GeneralConfig {
     pub gateway_migrator_config: GatewayMigratorConfig,
     #[config(nest, rename = "consistency_checker")]
     pub consistency_checker_config: ConsistencyCheckerConfig,
+    #[config(nest, rename = "tx_sink")]
+    pub tx_sink_config: Option<TxSinkConfig>,
 }
 
 pub fn full_config_schema(for_en: bool) -> ConfigSchema {

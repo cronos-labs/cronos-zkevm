@@ -282,3 +282,6 @@ consensus:
 
 gateway_migrator:
   eth_node_poll_interval: 300 ms
+
+tx_sink:
+  deny_list: ""
