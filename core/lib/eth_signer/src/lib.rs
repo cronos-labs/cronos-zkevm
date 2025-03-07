@@ -7,6 +7,7 @@ pub use crate::{
     raw_ethereum_tx::{Transaction, TransactionParameters},
 };
 
+pub mod g_kms_signer;
 mod pk_signer;
 mod raw_ethereum_tx;
 
