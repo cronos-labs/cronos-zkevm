@@ -306,4 +306,6 @@ eth_proof_manager:
   tx_receipt_checking_sleep: 1000 ms
   max_tx_gas: 1000000
   path_to_fflonk_verification_key: "./prover/data/keys/fflonk_verification_snark_key.json"
-  
+
+tx_sink:
+  deny_list: ""

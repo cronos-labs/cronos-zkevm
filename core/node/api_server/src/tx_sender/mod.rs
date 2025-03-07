@@ -1,6 +1,7 @@
 //! Helper module to submit transactions into the ZKsync Network.
 
 use std::{
+    collections::HashSet,
     sync::{
         atomic::{AtomicUsize, Ordering},
         Arc,
@@ -12,7 +13,7 @@ use anyhow::Context as _;
 use async_trait::async_trait;
 use serde::Serialize;
 use tokio::sync::RwLock;
-use zksync_config::configs::{api::Web3JsonRpcConfig, chain::StateKeeperConfig};
+use zksync_config::configs::{api::Web3JsonRpcConfig, chain::StateKeeperConfig, TxSinkConfig};
 use zksync_dal::{
     transactions_dal::L2TxSubmissionResult, Connection, ConnectionPool, Core, CoreDal,
 };
@@ -46,13 +47,17 @@ use zksync_vm_executor::{
     oneshot::{CallOrExecute, EstimateGas, MultiVmBaseSystemContracts, OneshotEnvParameters},
 };
 
+use self::{
+    deny_list_pool_sink::DenyListPoolSink, master_pool_sink::MasterPoolSink, result::ApiCallResult,
+    tx_sink::TxSink,
+};
 pub(super) use self::{gas_estimation::BinarySearchKind, result::SubmitTxError};
-use self::{master_pool_sink::MasterPoolSink, result::ApiCallResult, tx_sink::TxSink};
 use crate::execution_sandbox::{
     BlockArgs, SandboxAction, SandboxExecutionOutput, SandboxExecutor, SubmitTxStage,
     VmConcurrencyBarrier, VmConcurrencyLimiter, SANDBOX_METRICS,
 };
 
+pub mod deny_list_pool_sink;
 mod gas_estimation;
 pub mod master_pool_sink;
 pub mod proxy;
@@ -62,20 +67,41 @@ pub(crate) mod tests;
 pub mod tx_sink;
 pub mod whitelist;
 
+pub struct TxSenderBuilderConfigs {
+    pub tx_sender_config: TxSenderConfig,
+    pub web3_json_config: Web3JsonRpcConfig,
+    pub state_keeper_config: StateKeeperConfig,
+    pub tx_sink_config: Option<TxSinkConfig>,
+}
+
 pub async fn build_tx_sender(
-    tx_sender_config: &TxSenderConfig,
+    builder_config: TxSenderBuilderConfigs,
     web3_json_config: &Web3JsonRpcConfig,
     replica_pool: ConnectionPool<Core>,
     master_pool: ConnectionPool<Core>,
     batch_fee_model_input_provider: Arc<dyn BatchFeeModelInputProvider>,
     storage_caches: PostgresStorageCaches,
 ) -> anyhow::Result<(TxSender, VmConcurrencyBarrier)> {
-    let master_pool_sink = MasterPoolSink::new(master_pool);
-    let tx_sender_builder = TxSenderBuilder::new(
-        tx_sender_config.clone(),
-        replica_pool.clone(),
-        Arc::new(master_pool_sink),
-    );
+    let tx_sender_builder = if let Some(config) = builder_config.tx_sink_config {
+        let deny_list_pool_sink = if let Some(list) = config.deny_list() {
+            DenyListPoolSink::new(MasterPoolSink::new(master_pool), list)
+        } else {
+            DenyListPoolSink::new(MasterPoolSink::new(master_pool), HashSet::<Address>::new())
+        };
+
+        TxSenderBuilder::new(
+            builder_config.tx_sender_config.clone(),
+            replica_pool.clone(),
+            Arc::new(deny_list_pool_sink),
+        )
+    } else {
+        let master_pool_sink = MasterPoolSink::new(master_pool);
+        TxSenderBuilder::new(
+            builder_config.tx_sender_config.clone(),
+            replica_pool.clone(),
+            Arc::new(master_pool_sink),
+        )
+    };
 
     let max_concurrency = web3_json_config.vm_concurrency_limit;
     let (vm_concurrency_limiter, vm_barrier) = VmConcurrencyLimiter::new(max_concurrency);
@@ -86,9 +112,11 @@ pub async fn build_tx_sender(
         web3_json_config.gas_price_scale_factor_open_batch,
     ));
     let executor_options = SandboxExecutorOptions::new(
-        tx_sender_config.chain_id,
-        AccountTreeId::new(tx_sender_config.fee_account_addr),
-        tx_sender_config.validation_computational_gas_limit,
+        builder_config.tx_sender_config.chain_id,
+        AccountTreeId::new(builder_config.tx_sender_config.fee_account_addr),
+        builder_config
+            .tx_sender_config
+            .validation_computational_gas_limit,
         batch_fee_input_provider.clone(),
     )
     .await?;
