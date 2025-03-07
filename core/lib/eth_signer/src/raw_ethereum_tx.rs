@@ -268,4 +268,8 @@ impl Transaction {
             transaction_hash,
         }
     }
+
+    pub fn encode_pub(&self, chain_id: u64, signature: Option<&Signature>) -> Vec<u8> {
+        self.encode(chain_id, signature)
+    }
 }
