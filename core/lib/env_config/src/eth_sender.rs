@@ -45,7 +45,7 @@ impl FromEnv for GasAdjusterConfig {
 #[cfg(test)]
 mod tests {
     use zksync_basic_types::pubdata_da::PubdataSendingMode;
-    use zksync_config::configs::eth_sender::ProofSendingMode;
+    use zksync_config::configs::eth_sender::{ProofSendingMode, SigningMode};
 
     use super::*;
     use crate::test_utils::{hash, EnvMutex};
@@ -76,6 +76,7 @@ mod tests {
                     tx_aggregation_paused: false,
                     time_in_mempool_in_l1_blocks_cap: 2000,
                     is_verifier_pre_fflonk: true,
+                    signing_mode: SigningMode::PrivateKey,
                 }),
                 gas_adjuster: Some(GasAdjusterConfig {
                     default_priority_fee_per_gas: 20000000000,
@@ -142,6 +143,7 @@ mod tests {
             ETH_SENDER_SENDER_is_verifier_pre_fflonk="true"
             ETH_WATCH_CONFIRMATIONS_FOR_ETH_EVENT="0"
             ETH_WATCH_ETH_NODE_POLL_INTERVAL="300"
+            ETH_SENDER_SENDER_SIGNING_MODE="PrivateKey"
             ETH_CLIENT_WEB3_URL="http://127.0.0.1:8545"
             ETH_CLIENT_GATEWAY_WEB3_URL="http://127.0.0.1:8547"
 
