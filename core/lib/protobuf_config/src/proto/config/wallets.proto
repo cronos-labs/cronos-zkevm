@@ -5,6 +5,7 @@ package zksync.config.wallets;
 message PrivateKeyWallet {
   optional string address = 1; // optional
   optional string private_key = 2; // required
+  optional string gkms_key_name = 3; // optional
 }
 
 message AddressWallet {

@@ -13,26 +13,41 @@ impl ProtoRepr for proto::Wallets {
     fn read(&self) -> anyhow::Result<Self::Type> {
         let eth_sender = if self.operator.is_some() && self.blob_operator.is_some() {
             let blob_operator = if let Some(blob_operator) = &self.blob_operator {
-                Some(Wallet::from_private_key_bytes(
-                    parse_h256(required(&blob_operator.private_key).context("blob operator")?)?,
-                    blob_operator
-                        .address
-                        .as_ref()
-                        .and_then(|a| parse_h160(a).ok()),
-                )?)
+                if let Some(gkms_key_name) = &blob_operator.gkms_key_name {
+                    // will validate the address and the key name when init the gkms_eth_signer
+                    Some(Wallet::from_gkms_signer(
+                        parse_h160(required(&blob_operator.address)?)?,
+                        gkms_key_name.to_string(),
+                    )?)
+                } else {
+                    Some(Wallet::from_private_key_bytes(
+                        parse_h256(required(&blob_operator.private_key).context("blob operator")?)?,
+                        blob_operator
+                            .address
+                            .as_ref()
+                            .and_then(|a| parse_h160(a).ok()),
+                    )?)
+                }
             } else {
                 None
             };
 
             let operator_wallet = &self.operator.clone().context("Operator private key")?;
 
-            let operator = Wallet::from_private_key_bytes(
-                parse_h256(required(&operator_wallet.private_key).context("operator")?)?,
-                operator_wallet
-                    .address
-                    .as_ref()
-                    .and_then(|a| parse_h160(a).ok()),
-            )?;
+            let operator = if let Some(gkms_key_name) = &operator_wallet.gkms_key_name {
+                Wallet::from_gkms_signer(
+                    parse_h160(required(&operator_wallet.address)?)?,
+                    gkms_key_name.to_string(),
+                )?
+            } else {
+                Wallet::from_private_key_bytes(
+                    parse_h256(required(&operator_wallet.private_key).context("operator")?)?,
+                    operator_wallet
+                        .address
+                        .as_ref()
+                        .and_then(|a| parse_h160(a).ok()),
+                )?
+            };
 
             Some(EthSender {
                 operator,
@@ -83,6 +98,7 @@ impl ProtoRepr for proto::Wallets {
             proto::PrivateKeyWallet {
                 address: Some(format!("{:?}", addr)),
                 private_key: Some(hex::encode(pk.expose_secret().secret_bytes())),
+                gkms_key_name: None,
             }
         };
 
