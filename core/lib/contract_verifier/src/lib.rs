@@ -292,7 +292,26 @@ impl ContractVerifier {
                     compiled = hex::encode(artifacts.deployed_bytecode()),
                     "Partial bytecode match",
                 );
-                verification_problems.push(VerificationProblem::IncorrectMetadata);
+
+                // try without the last 64bytes which usually represents the compiler metadata
+                let mut deployed_bytecode_without_metadata: Vec<u8> = deployed_bytecode.to_vec();
+                // Check if the length of the vector is greater than or equal to 64
+                if deployed_bytecode_without_metadata.len() >= 64 {
+                    // Remove the last 64 bytes
+                    let new_len = deployed_bytecode_without_metadata.len() - 64;
+                    deployed_bytecode_without_metadata.truncate(new_len);
+                    if artifacts.bytecode.clone() != deployed_bytecode_without_metadata {
+                        tracing::info!(
+                        "Bytecode without metadata mismatch req {}, deployed: 0x{}, compiled 0x{}",
+                        request.id,
+                        hex::encode(deployed_bytecode_without_metadata.clone()),
+                        hex::encode(artifacts.bytecode.clone())
+                    );
+                        verification_problems.push(VerificationProblem::IncorrectMetadata);
+                    }
+                } else {
+                    verification_problems.push(VerificationProblem::IncorrectMetadata);
+                }
             }
             Match::None => {
                 tracing::trace!(
@@ -301,7 +320,26 @@ impl ContractVerifier {
                     compiled = hex::encode(artifacts.deployed_bytecode()),
                     "Deployed (runtime) bytecode mismatch",
                 );
-                return Err(ContractVerifierError::BytecodeMismatch);
+
+                // try without the last 64bytes which usually represents the compiler metadata
+                let mut deployed_bytecode_without_metadata: Vec<u8> = deployed_bytecode.to_vec();
+                // Check if the length of the vector is greater than or equal to 64
+                if deployed_bytecode_without_metadata.len() >= 64 {
+                    // Remove the last 64 bytes
+                    let new_len = deployed_bytecode_without_metadata.len() - 64;
+                    deployed_bytecode_without_metadata.truncate(new_len);
+                    if artifacts.bytecode.clone() != deployed_bytecode_without_metadata {
+                        tracing::info!(
+                        "Bytecode without metadata mismatch req {}, deployed: 0x{}, compiled 0x{}",
+                        request.id,
+                        hex::encode(deployed_bytecode_without_metadata.clone()),
+                        hex::encode(artifacts.bytecode.clone())
+                    );
+                        return Err(ContractVerifierError::BytecodeMismatch);
+                    }
+                } else {
+                    return Err(ContractVerifierError::BytecodeMismatch);
+                }
             }
         }
 
@@ -331,7 +369,7 @@ impl ContractVerifier {
         tracing::trace!(%verified_at, "verified request");
         let info = VerificationInfo {
             request,
-            artifacts,
+            artifacts: artifacts.clone(),
             verified_at,
             verification_problems,
         };
