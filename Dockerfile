@@ -16,7 +16,7 @@ COPY --from=builder /usr/src/zksync/core/target/release/zksync_external_node /us
 COPY --from=builder /usr/src/zksync/core/target/release/block_reverter /usr/bin
 COPY --from=builder /usr/local/cargo/bin/sqlx /usr/bin
 COPY --from=builder /usr/src/zksync/docker/external-node/entrypoint.sh /usr/bin
-COPY --from=builder /usr/src/zksync/backups/generate_secrets.sh /configs/
+COPY --from=builder /usr/src/zksync/backups/generate_secrets.sh /scripts/
 
 COPY --from=base /contracts/ /contracts/
 COPY --from=base /etc/ /etc/
