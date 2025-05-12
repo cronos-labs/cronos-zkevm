@@ -9,8 +9,8 @@ on:
 env:
   REGISTRY: ghcr.io/cronos-labs
   IMAGE_NAME: external-node
-  IMAGE_TAG: v27.1.1-alpha
-  BRANCH_NAME: cronos_core-v27.1.1-alpha
+  IMAGE_TAG: v27.5.3
+  BRANCH_NAME: cronos_core-v27.5.3
 
 jobs:
   build-and-push:
