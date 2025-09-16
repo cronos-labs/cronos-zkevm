@@ -36,6 +36,7 @@ jobs:
         run: |
           mkdir -p /tmp/build-files
           cp Dockerfile /tmp/build-files/
+          cp generate_secrets.sh /tmp/build-files/
 
       - name: Checkout target branch
         uses: actions/checkout@v4
@@ -47,7 +48,7 @@ jobs:
         run: |
           cp /tmp/build-files/Dockerfile ./
           mkdir -p backups
-          cp docs/src/guides/external-node/docker-compose-examples/configs/generate_secrets.sh backups/generate_secrets.sh
+          cp /tmp/build-files/generate_secrets.sh ./backups/generate_secrets.sh
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
