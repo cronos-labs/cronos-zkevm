@@ -8,9 +8,9 @@ on:
 
 env:
   REPO: matter-labs/zksync-era
-  BRANCH_NAME: core-v29.1.0
+  BRANCH_NAME: core-v29.3.0
   BASE_IMAGE_TAG: v29.2.0
-  IMAGE_TAG: v29.1.0
+  IMAGE_TAG: v29.3.0
 
 jobs:
   build-and-push:
