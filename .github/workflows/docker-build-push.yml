@@ -8,7 +8,7 @@ on:
 
 env:
   REPO: cronos-labs/cronos-zkevm
-  BRANCH_NAME: core-v29.6.0
+  BRANCH_NAME: cronos_core-v29.6.0
   BASE_IMAGE_TAG: v29.6.0
   IMAGE_TAG: v29.6.0
 
