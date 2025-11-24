@@ -7,10 +7,10 @@ on:
   workflow_dispatch:
 
 env:
-  REPO: matter-labs/zksync-era
-  BRANCH_NAME: core-v29.3.0
-  BASE_IMAGE_TAG: v29.2.0
-  IMAGE_TAG: v29.3.0
+  REPO: cronos-labs/cronos-zkevm
+  BRANCH_NAME: core-v29.6.0
+  BASE_IMAGE_TAG: v29.6.0
+  IMAGE_TAG: v29.6.0
 
 jobs:
   build-and-push:
