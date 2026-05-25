@@ -81,17 +81,14 @@ impl EthereumSigner for GKMSSigner {
         let r_h256 = GKMSSigner::u256_to_h256(signature.r);
         let s_h256 = GKMSSigner::u256_to_h256(signature.s);
 
-        // Ensure the `v` component is in the correct byte format.
-        let v_byte = match signature.v.try_into() {
-            Ok(v) => v,
-            Err(_) => {
-                return Err(SignerError::SigningFailed(
-                    "V value conversion failed".to_string(),
-                ))
-            }
+        // Normalize v to recovery id (0 or 1). The ethers Signature struct
+        // returns v as 27 or 28; from_rsv expects the raw recovery id.
+        let v_byte: u8 = if signature.v >= 27 {
+            (signature.v - 27) as u8
+        } else {
+            signature.v as u8
         };
 
-        // Construct the Ethereum signature from the R, S, and V components.
         let eth_sig = PackedEthSignature::from_rsv(&r_h256, &s_h256, v_byte);
 
         Ok(eth_sig)
@@ -130,13 +127,21 @@ impl EthereumSigner for GKMSSigner {
             .await
             .map_err(|e| SignerError::SigningFailed(e.to_string()))?;
 
+        // Normalize v to recovery id (0 or 1). The ethers Signature struct
+        // returns v as 27 or 28; raw recovery id otherwise.
+        let recovery_id = if signature.v >= 27 {
+            signature.v - 27
+        } else {
+            signature.v
+        };
+
         let adjusted_v = if let Some(transaction_type) = tx.transaction_type.map(|t| t.as_u64()) {
             match transaction_type {
-                0 => signature.v + raw_tx.chain_id * 2 + 35, // EIP-155
-                _ => signature.v,                            // EIP-2930 and others
+                0 => recovery_id + raw_tx.chain_id * 2 + 35, // EIP-155
+                _ => recovery_id,                            // EIP-2930/1559/4844 use yParity
             }
         } else {
-            signature.v + raw_tx.chain_id * 2 + 35 // EIP-155
+            recovery_id + raw_tx.chain_id * 2 + 35 // Legacy EIP-155
         };
 
         let r_h256 = GKMSSigner::u256_to_h256(signature.r);

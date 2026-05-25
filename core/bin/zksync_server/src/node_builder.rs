@@ -823,7 +823,7 @@ impl MainNodeBuilder {
             self = self.add_replication_lag_checker_layer()?;
         }
 
-        let mut deny_list_enabled = false;
+        let deny_list_enabled = components.contains(&Component::TxSinkDenyList);
 
         // Add "component-specific" layers.
         // Note that the layers are added only once, so it's fine to add the same layer multiple times.
@@ -923,7 +923,6 @@ impl MainNodeBuilder {
                 }
                 Component::TxSinkDenyList => {
                     tracing::info!("L2 denylist enabled.");
-                    deny_list_enabled = true;
                 }
             }
         }
