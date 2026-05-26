@@ -5423,7 +5423,7 @@ version = "0.14.0"
 source = "git+https://github.com/yoshidan/google-cloud-rust.git?tag=v20240627#8f387a13309707c493d2e581961ee5b0f20631fc"
 dependencies = [
  "prost 0.12.6",
- "prost-types",
+ "prost-types 0.12.6",
  "tonic 0.11.0",
 ]
 
@@ -5440,7 +5440,7 @@ dependencies = [
  "google-cloud-googleapis",
  "google-cloud-token 0.1.2 (git+https://github.com/yoshidan/google-cloud-rust.git?tag=v20240627)",
  "k256 0.13.4",
- "prost-types",
+ "prost-types 0.12.6",
  "serde",
  "serde_json",
  "thiserror 1.0.69",
@@ -11846,7 +11846,7 @@ version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7f57eb36ecbe0fc510036adff84824dd3c24bb781e21bfa67b69d556aa85214f"
 dependencies = [
- "pin-project",
+ "pin-project 1.1.10",
  "rand 0.8.5",
  "tokio",
 ]
