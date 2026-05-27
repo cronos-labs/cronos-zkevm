@@ -104,7 +104,7 @@
       },
       "original": {
         "owner": "cronos-labs",
-        "ref": "cronos-v29.17.0",
+        "ref": "cronos_core-v29.17.0",
         "repo": "cronos-zkevm",
         "type": "github"
       }

@@ -3,7 +3,7 @@
   inputs.flake-utils.url = "github:numtide/flake-utils";
   inputs.rust-overlay.url = "github:oxalica/rust-overlay";
   inputs.crane.url = "github:ipetkov/crane";
-  inputs.src.url = "github:cronos-labs/cronos-zkevm/cronos-v29.17.0";
+  inputs.src.url = "github:cronos-labs/cronos-zkevm/cronos_core-v29.17.0";
   inputs.src.flake = false;
 
   outputs = { self, nixpkgs, flake-utils, rust-overlay, crane, src }:
@@ -63,8 +63,8 @@
           };
         };
 
-        zksyncBinaries = craneLib.buildPackage (commonArgs // {
-          cargoExtraArgs = "--bin zksync_server --bin zksync_contract_verifier --bin snapshots_creator";
+        serverBinaries = craneLib.buildPackage (commonArgs // {
+          cargoExtraArgs = "--bin zksync_server --bin zksync_contract_verifier --bin snapshots_creator --bin block_reverter";
           doCheck = false;
 
           postPatch = ''
@@ -77,11 +77,8 @@
         });
       in {
         packages = {
-          server = zksyncBinaries;
-          contract-verifier = zksyncBinaries;
-          snapshots-creator = zksyncBinaries;
-          block_reverter = zksyncBinaries;
-          default = zksyncBinaries;
+          server = serverBinaries;
+          default = serverBinaries;
         };
       }
     );
