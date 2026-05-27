@@ -3,7 +3,7 @@
   inputs.flake-utils.url = "github:numtide/flake-utils";
   inputs.rust-overlay.url = "github:oxalica/rust-overlay";
   inputs.crane.url = "github:ipetkov/crane";
-  inputs.src.url = "github:cronos-labs/cronos-zkevm/cronos_core-v29.17.0";
+  inputs.src.url = "github:cronos-labs/cronos-zkevm/cronos-v29.17.0";
   inputs.src.flake = false;
 
   outputs = { self, nixpkgs, flake-utils, rust-overlay, crane, src }:
@@ -63,14 +63,17 @@
           };
         };
 
-        cargoArtifacts = craneLib.buildDepsOnly (commonArgs // {
-          buildPhaseCargoCommand = "cargo check --release --all-targets";
-        });
-
         zksyncBinaries = craneLib.buildPackage (commonArgs // {
-          inherit cargoArtifacts;
-          buildPhaseCargoCommand = "cargo build --release --bin zksync_server --bin zksync_contract_verifier --bin snapshots_creator";
+          cargoExtraArgs = "--bin zksync_server --bin zksync_contract_verifier --bin snapshots_creator";
           doCheck = false;
+
+          postPatch = ''
+            mkdir -p "$TMPDIR/nix-vendor"
+            cp -Lr "$cargoVendorDir" -T "$TMPDIR/nix-vendor"
+            sed -i "s|$cargoVendorDir|$TMPDIR/nix-vendor/|g" "$TMPDIR/nix-vendor/config.toml"
+            chmod -R +w "$TMPDIR/nix-vendor"
+            cargoVendorDir="$TMPDIR/nix-vendor"
+          '';
         });
       in {
         packages = {

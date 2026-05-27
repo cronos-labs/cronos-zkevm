@@ -95,16 +95,16 @@
     "src": {
       "flake": false,
       "locked": {
-        "lastModified": 1779697306,
-        "narHash": "sha256-2zH01w4o58jgcKjO+1dJRGiTYqtOzr6Orcu+dS4pGFc=",
+        "lastModified": 1779789744,
+        "narHash": "sha256-4RtYCxv6/8cq9nkXTw1+qXnjIWisQOFwUk/7ttGp5U8=",
         "owner": "cronos-labs",
         "repo": "cronos-zkevm",
-        "rev": "1001c4b76f7d0947bfeba98a36cc5415c6d0af09",
+        "rev": "65dc545be23d71a1b5960bf45fd7d6be39ff76d1",
         "type": "github"
       },
       "original": {
         "owner": "cronos-labs",
-        "ref": "cronos_core-v29.17.0",
+        "ref": "cronos-v29.17.0",
         "repo": "cronos-zkevm",
         "type": "github"
       }
