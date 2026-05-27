@@ -63,7 +63,7 @@
           };
         };
 
-        serverBinaries = craneLib.buildPackage (commonArgs // {
+        coreBinaries = craneLib.buildPackage (commonArgs // {
           cargoExtraArgs = "--bin zksync_server --bin zksync_contract_verifier --bin snapshots_creator --bin block_reverter";
           doCheck = false;
 
@@ -77,8 +77,8 @@
         });
       in {
         packages = {
-          server = serverBinaries;
-          default = serverBinaries;
+          core = coreBinaries;
+          default = coreBinaries;
         };
       }
     );
