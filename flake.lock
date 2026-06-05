@@ -79,11 +79,11 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1780543271,
-        "narHash": "sha256-oPJ7eJN1sM37v92Rp/eyQL7/rUm0BOvXEBAoq/zN0cM=",
+        "lastModified": 1780629589,
+        "narHash": "sha256-oHysjxZdaEqkmyDpN8G1bl3V+r9uyRD1O66bH0bq0Cs=",
         "owner": "oxalica",
         "repo": "rust-overlay",
-        "rev": "c30ca201c5093540cf792f6982f81ba1aa0f3514",
+        "rev": "7a5a1c0a5cb86a28224304309b68f050835fd1f6",
         "type": "github"
       },
       "original": {
@@ -95,17 +95,17 @@
     "src": {
       "flake": false,
       "locked": {
-        "lastModified": 1776956578,
-        "narHash": "sha256-q0TNI1ICTfjIcb+pariOgyx5Mst0RPHJq0mpFwnlgZ0=",
-        "owner": "matter-labs",
-        "repo": "zksync-era",
-        "rev": "ea65ea466296668a6fc827fe7ac7aee35314315d",
+        "lastModified": 1780635994,
+        "narHash": "sha256-6dpLshsd+K65mbBlcsJjtRPRaICfTELxQ1yfKdyJzmU=",
+        "owner": "cronos-labs",
+        "repo": "cronos-zkevm",
+        "rev": "3754747db71dc6cef5f4734ce7fa0f89ed2bcdf5",
         "type": "github"
       },
       "original": {
-        "owner": "matter-labs",
-        "ref": "core-v29.16.0",
-        "repo": "zksync-era",
+        "owner": "cronos-labs",
+        "ref": "cronos-v29.16.0",
+        "repo": "cronos-zkevm",
         "type": "github"
       }
     },

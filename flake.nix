@@ -3,7 +3,7 @@
   inputs.flake-utils.url = "github:numtide/flake-utils";
   inputs.rust-overlay.url = "github:oxalica/rust-overlay";
   inputs.crane.url = "github:ipetkov/crane";
-  inputs.src.url = "github:matter-labs/zksync-era/core-v29.16.0";
+  inputs.src.url = "github:cronos-labs/cronos-zkevm/cronos-v29.16.0";
   inputs.src.flake = false;
 
   outputs = { self, nixpkgs, flake-utils, rust-overlay, crane, src }:
