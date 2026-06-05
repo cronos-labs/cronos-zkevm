@@ -3,7 +3,7 @@
   inputs.flake-utils.url = "github:numtide/flake-utils";
   inputs.rust-overlay.url = "github:oxalica/rust-overlay";
   inputs.crane.url = "github:ipetkov/crane";
-  inputs.src.url = "github:cronos-labs/cronos-zkevm/cronos_core-v29.17.0";
+  inputs.src.url = "github:matter-labs/zksync-era/core-v29.16.0";
   inputs.src.flake = false;
 
   outputs = { self, nixpkgs, flake-utils, rust-overlay, crane, src }:
@@ -50,7 +50,7 @@
           src = cargoSrc;
           inherit nativeBuildInputs buildInputs;
           pname = "zksync";
-          version = "29.17.0";
+          version = "29.16.0";
           strictDeps = true;
           __noChroot = true;
 
