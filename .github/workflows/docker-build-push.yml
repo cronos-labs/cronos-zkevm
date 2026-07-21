@@ -8,9 +8,9 @@ on:
 
 env:
   REPO: cronos-labs/cronos-zkevm
-  BRANCH_NAME: cronos_core-v29.17.0
-  BASE_IMAGE_TAG: v29.17.0
-  IMAGE_TAG: v29.17.0
+  BRANCH_NAME: cronos_core-v31.3.0
+  BASE_IMAGE_TAG: v31.3.0
+  IMAGE_TAG: v31.3.0
 
 jobs:
   build-and-push:
