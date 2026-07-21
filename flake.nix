@@ -3,7 +3,7 @@
   inputs.flake-utils.url = "github:numtide/flake-utils";
   inputs.rust-overlay.url = "github:oxalica/rust-overlay";
   inputs.crane.url = "github:ipetkov/crane";
-  inputs.src.url = "github:cronos-labs/cronos-zkevm/cronos_core-v29.17.0";
+  inputs.src.url = "github:cronos-labs/cronos-zkevm/cronos_core-v31.3.0";
   inputs.src.flake = false;
 
   outputs = { self, nixpkgs, flake-utils, rust-overlay, crane, src }:
@@ -18,6 +18,13 @@
         };
         rustToolchain = pkgsWithRust.rust-bin.nightly."2025-03-19".default;
         craneLib = (crane.mkLib pkgs).overrideToolchain rustToolchain;
+
+        airbenderVerifierSource =
+          "git+https://github.com/matter-labs/eravm-airbender-verifier.git?rev=44df94719be3a1eb688e2a73a53a228cb7d65efa#44df94719be3a1eb688e2a73a53a228cb7d65efa";
+        airbenderVerifier = pkgs.fetchzip {
+          url = "https://github.com/matter-labs/eravm-airbender-verifier/archive/44df94719be3a1eb688e2a73a53a228cb7d65efa.tar.gz";
+          hash = "sha256-8m8WnteQWWeydOVKM4J/a3+mVeU6FrOMkn0ZgLWXUkU=";
+        };
 
         cargoSrc = lib.cleanSourceWith {
           src = "${src}/core";
@@ -46,11 +53,19 @@
           postgresql
         ];
 
+        cargoVendorDir = craneLib.vendorCargoDeps {
+          src = cargoSrc;
+          overrideVendorGitCheckout = packages: drv:
+            if lib.any (package: package.source == airbenderVerifierSource) packages
+            then drv.overrideAttrs { src = airbenderVerifier; }
+            else drv;
+        };
+
         commonArgs = {
           src = cargoSrc;
-          inherit nativeBuildInputs buildInputs;
+          inherit cargoVendorDir nativeBuildInputs buildInputs;
           pname = "zksync";
-          version = "29.17.0";
+          version = "31.3.0";
           strictDeps = true;
           __noChroot = true;
 
